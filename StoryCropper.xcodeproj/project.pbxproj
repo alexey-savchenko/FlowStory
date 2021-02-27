@@ -3,27 +3,30 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2254711B25EA803F00B4ECA3 /* UNILib in Frameworks */ = {isa = PBXBuildFile; productRef = 2254711A25EA803F00B4ECA3 /* UNILib */; };
+		2254711F25EA964300B4ECA3 /* Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2254711E25EA964300B4ECA3 /* Ext.swift */; };
+		2254712325EABB6D00B4ECA3 /* 1-second-of-silence.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 2254712225EABB6C00B4ECA3 /* 1-second-of-silence.mp3 */; };
 		2257A1A325B07DDA001F0A99 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2257A1A225B07DDA001F0A99 /* AppDelegate.swift */; };
-		2257A1A525B07DDA001F0A99 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2257A1A425B07DDA001F0A99 /* SceneDelegate.swift */; };
 		2257A1A725B07DDA001F0A99 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2257A1A625B07DDA001F0A99 /* ViewController.swift */; };
-		2257A1AA25B07DDA001F0A99 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2257A1A825B07DDA001F0A99 /* Main.storyboard */; };
 		2257A1AC25B07DDC001F0A99 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2257A1AB25B07DDC001F0A99 /* Assets.xcassets */; };
 		2257A1AF25B07DDC001F0A99 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2257A1AD25B07DDC001F0A99 /* LaunchScreen.storyboard */; };
+		2257A1B925B07F5A001F0A99 /* VideoUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2257A1B825B07F5A001F0A99 /* VideoUtility.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2254711E25EA964300B4ECA3 /* Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ext.swift; sourceTree = "<group>"; };
+		2254712225EABB6C00B4ECA3 /* 1-second-of-silence.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "1-second-of-silence.mp3"; sourceTree = "<group>"; };
 		2257A19F25B07DDA001F0A99 /* StoryCropper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StoryCropper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2257A1A225B07DDA001F0A99 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		2257A1A425B07DDA001F0A99 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		2257A1A625B07DDA001F0A99 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		2257A1A925B07DDA001F0A99 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		2257A1AB25B07DDC001F0A99 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2257A1AE25B07DDC001F0A99 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		2257A1B025B07DDC001F0A99 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2257A1B825B07F5A001F0A99 /* VideoUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoUtility.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,6 +34,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2254711B25EA803F00B4ECA3 /* UNILib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -57,12 +61,13 @@
 			isa = PBXGroup;
 			children = (
 				2257A1A225B07DDA001F0A99 /* AppDelegate.swift */,
-				2257A1A425B07DDA001F0A99 /* SceneDelegate.swift */,
+				2257A1B825B07F5A001F0A99 /* VideoUtility.swift */,
+				2254712225EABB6C00B4ECA3 /* 1-second-of-silence.mp3 */,
 				2257A1A625B07DDA001F0A99 /* ViewController.swift */,
-				2257A1A825B07DDA001F0A99 /* Main.storyboard */,
 				2257A1AB25B07DDC001F0A99 /* Assets.xcassets */,
 				2257A1AD25B07DDC001F0A99 /* LaunchScreen.storyboard */,
 				2257A1B025B07DDC001F0A99 /* Info.plist */,
+				2254711E25EA964300B4ECA3 /* Ext.swift */,
 			);
 			path = StoryCropper;
 			sourceTree = "<group>";
@@ -83,6 +88,9 @@
 			dependencies = (
 			);
 			name = StoryCropper;
+			packageProductDependencies = (
+				2254711A25EA803F00B4ECA3 /* UNILib */,
+			);
 			productName = StoryCropper;
 			productReference = 2257A19F25B07DDA001F0A99 /* StoryCropper.app */;
 			productType = "com.apple.product-type.application";
@@ -94,7 +102,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1220;
-				LastUpgradeCheck = 1220;
+				LastUpgradeCheck = 1240;
 				TargetAttributes = {
 					2257A19E25B07DDA001F0A99 = {
 						CreatedOnToolsVersion = 12.2;
@@ -110,6 +118,9 @@
 				Base,
 			);
 			mainGroup = 2257A19625B07DDA001F0A99;
+			packageReferences = (
+				2254711925EA803F00B4ECA3 /* XCRemoteSwiftPackageReference "UNILib" */,
+			);
 			productRefGroup = 2257A1A025B07DDA001F0A99 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -125,8 +136,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				2257A1AF25B07DDC001F0A99 /* LaunchScreen.storyboard in Resources */,
+				2254712325EABB6D00B4ECA3 /* 1-second-of-silence.mp3 in Resources */,
 				2257A1AC25B07DDC001F0A99 /* Assets.xcassets in Resources */,
-				2257A1AA25B07DDA001F0A99 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -137,23 +148,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2257A1B925B07F5A001F0A99 /* VideoUtility.swift in Sources */,
+				2254711F25EA964300B4ECA3 /* Ext.swift in Sources */,
 				2257A1A725B07DDA001F0A99 /* ViewController.swift in Sources */,
 				2257A1A325B07DDA001F0A99 /* AppDelegate.swift in Sources */,
-				2257A1A525B07DDA001F0A99 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		2257A1A825B07DDA001F0A99 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				2257A1A925B07DDA001F0A99 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		2257A1AD25B07DDC001F0A99 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -216,7 +220,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -271,7 +275,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -289,6 +293,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 3C5B553S6Y;
 				INFOPLIST_FILE = StoryCropper/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -308,6 +313,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 3C5B553S6Y;
 				INFOPLIST_FILE = StoryCropper/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -341,6 +347,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2254711925EA803F00B4ECA3 /* XCRemoteSwiftPackageReference "UNILib" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/alexey-savchenko/UNILib.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2254711A25EA803F00B4ECA3 /* UNILib */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2254711925EA803F00B4ECA3 /* XCRemoteSwiftPackageReference "UNILib" */;
+			productName = UNILib;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2257A19725B07DDA001F0A99 /* Project object */;
 }
