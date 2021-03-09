@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		2254711B25EA803F00B4ECA3 /* UNILib in Frameworks */ = {isa = PBXBuildFile; productRef = 2254711A25EA803F00B4ECA3 /* UNILib */; };
 		2254711F25EA964300B4ECA3 /* Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2254711E25EA964300B4ECA3 /* Ext.swift */; };
-		2254712325EABB6D00B4ECA3 /* 1-second-of-silence.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 2254712225EABB6C00B4ECA3 /* 1-second-of-silence.mp3 */; };
 		2257A1A325B07DDA001F0A99 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2257A1A225B07DDA001F0A99 /* AppDelegate.swift */; };
 		2257A1A725B07DDA001F0A99 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2257A1A625B07DDA001F0A99 /* ViewController.swift */; };
 		2257A1AC25B07DDC001F0A99 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2257A1AB25B07DDC001F0A99 /* Assets.xcassets */; };
@@ -19,7 +18,6 @@
 
 /* Begin PBXFileReference section */
 		2254711E25EA964300B4ECA3 /* Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ext.swift; sourceTree = "<group>"; };
-		2254712225EABB6C00B4ECA3 /* 1-second-of-silence.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "1-second-of-silence.mp3"; sourceTree = "<group>"; };
 		2257A19F25B07DDA001F0A99 /* StoryCropper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StoryCropper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2257A1A225B07DDA001F0A99 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2257A1A625B07DDA001F0A99 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -62,7 +60,6 @@
 			children = (
 				2257A1A225B07DDA001F0A99 /* AppDelegate.swift */,
 				2257A1B825B07F5A001F0A99 /* VideoUtility.swift */,
-				2254712225EABB6C00B4ECA3 /* 1-second-of-silence.mp3 */,
 				2257A1A625B07DDA001F0A99 /* ViewController.swift */,
 				2257A1AB25B07DDC001F0A99 /* Assets.xcassets */,
 				2257A1AD25B07DDC001F0A99 /* LaunchScreen.storyboard */,
@@ -136,7 +133,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				2257A1AF25B07DDC001F0A99 /* LaunchScreen.storyboard in Resources */,
-				2254712325EABB6D00B4ECA3 /* 1-second-of-silence.mp3 in Resources */,
 				2257A1AC25B07DDC001F0A99 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

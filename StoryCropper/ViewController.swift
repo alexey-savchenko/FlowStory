@@ -126,7 +126,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
   }
   
   func selectedVideoWith(_ assetURL: URL) {
-    makeFlowVideo1(assetURL: assetURL)
+    makeFlowVideo(assetURL: assetURL)
       .map { asset in return (asset as! AVURLAsset).url }
       .sink { url in
         if let error = self.saveVideoToAlbum(url) {

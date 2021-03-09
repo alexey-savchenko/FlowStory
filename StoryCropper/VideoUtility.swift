@@ -21,17 +21,17 @@ func uniqueURL() -> URL {
   return url
 }
 
-func makeFlowVideo1(
+func makeFlowVideo(
   assetURL: URL
 ) -> AnyPublisher<AVAsset, Never> {
   let image = UIImage(contentsOfFile: assetURL.path)!
   let url = uniqueURL()
   let renderSize = CGSize(width: 1080, height: 1920)
   return Future { promise in
-    createVideoFromImageSync1(
+    createVideoFromImageSync(
       image,
       size: renderSize,
-      duration: 10,
+      duration: 15,
       outputURL: url
     ) { (img, progress) -> CIImage in
       
@@ -59,7 +59,7 @@ func makeFlowVideo1(
 
 private let frameDuration = CMTime(value: 1, timescale: 30)
 
-private func createVideoFromImageSync1(
+private func createVideoFromImageSync(
   _ image: UIImage,
   size: CGSize,
   duration: TimeInterval,
@@ -119,15 +119,21 @@ private func createVideoFromImageSync1(
     let frameCount = duration / frameDuration.seconds
     print("Number of frames - \(frameCount)")
     
-    var nextStartTimeForFrame = CMTime.zero
+    let frameTimes = stride(
+      from: 0,
+      to: duration - frameDuration.seconds,
+      by: frameDuration.seconds
+    )
+    .reduce(into: [CMTime.zero]) { (result, _) in
+      result.append(result.last! + frameDuration)
+    }
     
-    while nextStartTimeForFrame.seconds < duration {
-      while !videoWriterInput.isReadyForMoreMediaData {
-        print("Wait append for \(outputURL.lastPathComponent)")
-        Thread.sleep(forTimeInterval: 0.1)
-      }
+    let opq = OperationQueue()
+    opq.qualityOfService = .userInitiated
+    opq.maxConcurrentOperationCount = 20
+    frameTimes.forEach { (timestamp) in
       
-      let percentComplete = nextStartTimeForFrame.seconds / duration
+      let percentComplete = timestamp.seconds / duration
       
       let filteredImage = process(sourceCIImage, percentComplete)
       
@@ -135,15 +141,12 @@ private func createVideoFromImageSync1(
         filteredImage,
         context: ctx,
         pixelBufferAdaptor: pixelBufferAdaptor,
-        presentationTime: nextStartTimeForFrame
+        presentationTime: timestamp
       ) {
         fatalError()
       }
-
-      print("Appended frame at \(nextStartTimeForFrame.seconds) for \(outputURL.lastPathComponent)")
-      
+        
       progress?(percentComplete)
-      nextStartTimeForFrame = nextStartTimeForFrame + frameDuration
     }
     
     videoWriterInput.markAsFinished()
@@ -189,7 +192,7 @@ func buffer(from image: UIImage) -> CVPixelBuffer? {
   return pixelBuffer
 }
 
-private func appendPixelBufferForImage(
+func appendPixelBufferForImage(
   _ image: CIImage,
   context: CIContext,
   pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor,
@@ -197,6 +200,17 @@ private func appendPixelBufferForImage(
 ) -> Bool {
   /// at the beginning of the append the status is false
   var appendSucceeded = false
+  
+  if !pixelBufferAdaptor.assetWriterInput.isReadyForMoreMediaData {
+    print("isReadyForMoreMediaData - false")
+    Thread.sleep(forTimeInterval: 0.5)
+    return appendPixelBufferForImage(
+      image,
+      context: context,
+      pixelBufferAdaptor: pixelBufferAdaptor,
+      presentationTime: presentationTime
+    )
+  }
   
   /**
    *  The proccess of appending new pixels is put inside a autoreleasepool

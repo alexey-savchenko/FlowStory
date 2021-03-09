@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "UNILib",
+        "repositoryURL": "https://github.com/alexey-savchenko/UNILib.git",
+        "state": {
+          "branch": "main",
+          "revision": "9f1544888773c623d0c4d9d6dbf88c59a144bf65",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}
