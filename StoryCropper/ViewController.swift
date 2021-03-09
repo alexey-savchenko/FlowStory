@@ -126,22 +126,15 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
   }
   
   func selectedVideoWith(_ assetURL: URL) {
-    makeFlowVideo(assetURL)
-      .receive(on: DispatchQueue.main)
-      .sink { (asset, videoComposition) in
-        let item = AVPlayerItem(asset: asset)
-        item.videoComposition = videoComposition
-        self.player.replaceCurrentItem(with: item)
-        self.player.play()
+    makeFlowVideo1(assetURL: assetURL)
+      .map { asset in return (asset as! AVURLAsset).url }
+      .sink { url in
+        if let error = self.saveVideoToAlbum(url) {
+          print(error)
+        } else {
+          print("success")
+        }
         
-//        export(asset, videoComposition: videoComposition, uniqueURL()) { (url) in
-//
-//          self.saveVideoToAlbum(url) { (error) in
-////            if (error != nil) {
-////              fatalError()
-////            }
-//          }
-//        }
       }
       .store(in: &disposeBag)
   }
@@ -156,17 +149,14 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     }
   }
   
-  func saveVideoToAlbum(_ outputURL: URL, _ completion: ((Error?) -> Void)?) {
-    
-    PHPhotoLibrary.shared().performChanges({
-      let r = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputURL)!
-      let placeholder = r.placeholderForCreatedAsset!
-      r.creationDate = Date()
-      let output = PHContentEditingOutput(placeholderForCreatedAsset: placeholder)
-      r.contentEditingOutput = output
-    }) { saved, error in
-      completion?(error)
+  func saveVideoToAlbum(_ outputURL: URL) -> Error? {
+    do {
+      try PHPhotoLibrary.shared().performChangesAndWait {
+        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputURL)
+      }
+      return nil
+    } catch {
+      return error
     }
-    
   }
 }

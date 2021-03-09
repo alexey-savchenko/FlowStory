@@ -25,6 +25,42 @@ func uniqueURL() -> URL {
   return url
 }
 
+func makeFlowVideo1(
+  assetURL: URL
+) -> AnyPublisher<AVAsset, Never> {
+  let image = UIImage(contentsOfFile: assetURL.path)!
+  let url = uniqueURL()
+  let renderSize = CGSize(width: 1080, height: 1920)
+  return Future { promise in
+    createVideoFromImageSync1(
+      image,
+      size: renderSize,
+      duration: 10,
+      outputURL: url
+    ) { (img, progress) -> CIImage in
+      
+      let params = scaleAndPositionInAspectFillMode(img.extent.size, in: renderSize)
+      let filled = img >>> params
+      
+      let maxOffset = filled.extent.width - renderSize.width
+      let offset = CGFloat(progress) * maxOffset
+      
+      let translated = filled
+        .transformed(by: .init(translationX: -params.position.x, y: 0))
+        .transformed(by: .init(translationX: -offset, y: 0))
+        .cropped(to: .init(origin: .zero, size: renderSize))
+      
+      return translated
+    } progress: { (progress) in
+      print(progress)
+    } result: { (asset) in
+      promise(.success(asset))
+    }
+
+  }
+  .eraseToAnyPublisher()
+}
+
 func makeFlowVideo(
   _ assetURL: URL
 ) -> AnyPublisher<(AVAsset, AVVideoComposition), Never> {
@@ -50,11 +86,24 @@ func processVideo(_ inputAsset: AVAsset, targetDuration: Int) -> (AVAsset, AVVid
   let composition = AVMutableComposition()
   let renderSize = CGSize(width: 1080, height: 1920)
   
-  let videoTrack = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid)!
-  let audioTrack = composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)!
+  let videoTrack = composition.addMutableTrack(
+    withMediaType: .video,
+    preferredTrackID: kCMPersistentTrackID_Invalid
+  )!
+  let audioTrack = composition.addMutableTrack(
+    withMediaType: .audio,
+    preferredTrackID: kCMPersistentTrackID_Invalid
+  )!
   
   let audioAsset = AVAsset(url: Bundle.main.url(forResource: "1-second-of-silence", withExtension: "mp3")!)
-  try! audioTrack.insertTimeRange(.init(start: .zero, duration: audioAsset.duration), of: audioAsset.tracks(withMediaType: .audio)[0], at: .zero)
+  try! audioTrack.insertTimeRange(
+    .init(
+      start: .zero,
+      duration: audioAsset.duration
+    ),
+    of: audioAsset.tracks(withMediaType: .audio)[0],
+    at: .zero
+  )
   
   var cursor = CMTime.zero
   (0..<targetDuration).forEach { (asset) in
@@ -107,20 +156,22 @@ func makeVideo(
 }
 
 func compatibleWith(asset: AVAsset) -> [String] {
-  let lock = DispatchSemaphore(value: 0)
   let allPresets = AVAssetExportSession.allExportPresets()
+  let lock = DispatchSemaphore(value: 0)
   var reg = allPresets.reduce(into: [String: Bool]()) { (acc, preset) in
     acc[preset] = false
   }
   
-  for p in allPresets {
-   
-    AVAssetExportSession.determineCompatibility(ofExportPreset: p, with: asset, outputFileType: .mov) { (value) in
-      reg[p] = value
-      print("\(p) \(value)")
+  for preset in allPresets {
+    lock.wait()
+    AVAssetExportSession.determineCompatibility(
+      ofExportPreset: preset,
+      with: asset,
+      outputFileType: fileType
+    ) { (value) in
+      reg[preset] = value
       lock.signal()
     }
-    
     lock.wait()
   }
   
@@ -134,17 +185,21 @@ func export(
   _ callback: @escaping (URL) -> Void
 ) {
 
-  let c = compatibleWith(asset: composition)
+  let compatiblePresets = compatibleWith(asset: composition)
   
-  let exportSession = AVAssetExportSession(asset: composition, presetName: AVAssetExportPresetHighestQuality)!
+  let exportSession = AVAssetExportSession(
+    asset: composition,
+    presetName: compatiblePresets.first ?? AVAssetExportPresetHighestQuality
+  )!
   exportSession.videoComposition = videoComposition
-  exportSession.outputFileType = .mp4
+  
   exportSession.outputURL = url
   exportSession.timeRange = .init(start: .zero, duration: composition.duration)
   exportSession.shouldOptimizeForNetworkUse = true
   exportSession.determineCompatibleFileTypes { (types) in
     print(types)
     print(exportSession.supportedFileTypes)
+    exportSession.outputFileType = types.first ?? fileType
   }
   exportSession.exportAsynchronously {
     switch exportSession.status {
@@ -157,6 +212,110 @@ func export(
 }
 
 private let frameDuration = CMTime(value: 1, timescale: 30)
+
+private func createVideoFromImageSync1(
+  _ image: UIImage,
+  size: CGSize,
+  duration: TimeInterval,
+  outputURL: URL,
+  process: @escaping (CIImage, Double) -> CIImage,
+  progress: ((Double) -> Void)?,
+  result: @escaping (AVAsset) -> Void
+) {
+  
+  let videoWriter = try! AVAssetWriter(outputURL: outputURL, fileType: fileType)
+  
+  /// create the basic video settings
+  let videoSettings: [String: Any] = [
+    AVVideoCodecKey: AVVideoCodecType.h264,
+    AVVideoWidthKey: size.width,
+    AVVideoHeightKey: size.height,
+  ]
+  
+  /// create a video writter input
+  let videoWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
+  
+  /// create setting for the pixel buffer
+  let sourceBufferAttributes: [String: Any] = [
+    kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32ARGB),
+    kCVPixelBufferWidthKey as String: Float(size.width),
+    kCVPixelBufferHeightKey as String: Float(size.height),
+    kCVPixelBufferCGImageCompatibilityKey as String: NSNumber(value: true),
+    kCVPixelBufferCGBitmapContextCompatibilityKey as String: NSNumber(value: true)
+  ]
+  
+  /// create pixel buffer for the input writter and the pixel buffer settings
+  let pixelBufferAdaptor =
+    AVAssetWriterInputPixelBufferAdaptor(
+      assetWriterInput: videoWriterInput,
+      sourcePixelBufferAttributes: sourceBufferAttributes
+    )
+  
+  /// check if an input can be added to the asset
+  assert(videoWriter.canAdd(videoWriterInput))
+  
+  /// add the input writter to the video asset
+  videoWriter.add(videoWriterInput)
+  
+  while !videoWriter.startWriting() {
+    print("Wait for start of writer for \(outputURL.lastPathComponent)")
+    Thread.sleep(forTimeInterval: 1)
+  }
+  
+  assert(pixelBufferAdaptor.pixelBufferPool != nil)
+  
+  let sourceCIImage = CIImage(image: image)!
+  let ctx = CIContext(mtlDevice: MTLCreateSystemDefaultDevice()!)
+  
+  let media_queue = DispatchQueue(label: "mediaInputQueue", autoreleaseFrequency: .workItem)
+  videoWriter.startSession(atSourceTime: CMTime.zero)
+  videoWriterInput.requestMediaDataWhenReady(on: media_queue) {
+    let frameCount = duration / frameDuration.seconds
+    print("Number of frames - \(frameCount)")
+    
+    var nextStartTimeForFrame = CMTime.zero
+    
+    while nextStartTimeForFrame.seconds < duration {
+      while !videoWriterInput.isReadyForMoreMediaData {
+        print("Wait append for \(outputURL.lastPathComponent)")
+        Thread.sleep(forTimeInterval: 0.1)
+      }
+      
+      let percentComplete = nextStartTimeForFrame.seconds / duration
+      
+      let filteredImage = process(sourceCIImage, percentComplete)
+      
+      if !appendPixelBufferForImage(
+        filteredImage,
+        context: ctx,
+        pixelBufferAdaptor: pixelBufferAdaptor,
+        presentationTime: nextStartTimeForFrame
+      ) {
+        fatalError()
+      }
+//      if !appendPixelBufferForImage(
+//        image,
+//        pixelBufferAdaptor: pixelBufferAdaptor,
+//        presentationTime: nextStartTimeForFrame
+//      ) {
+//        fatalError()
+//      }
+      print("Appended frame at \(nextStartTimeForFrame.seconds) for \(outputURL.lastPathComponent)")
+      
+      progress?(percentComplete)
+      nextStartTimeForFrame = nextStartTimeForFrame + frameDuration
+    }
+    
+    videoWriterInput.markAsFinished()
+    
+    videoWriter.finishWriting {
+      let asset = AVAsset(url: outputURL)
+      print("Asset duration - \(asset.duration.seconds)")
+      result(asset)
+    }
+  }
+}
+
 
 private func createVideoFromImageSync(
   _ image: UIImage,
@@ -205,9 +364,6 @@ private func createVideoFromImageSync(
   while !videoWriter.startWriting() {
     print("Wait for start of writer for \(outputURL.lastPathComponent)")
     Thread.sleep(forTimeInterval: 1)
-//    if videoWriter.error != nil {
-//      fatalError()
-//    }
   }
   
   assert(pixelBufferAdaptor.pixelBufferPool != nil)
@@ -280,6 +436,60 @@ func buffer(from image: UIImage) -> CVPixelBuffer? {
   CVPixelBufferUnlockBaseAddress(pixelBuffer!, CVPixelBufferLockFlags(rawValue: 0))
   
   return pixelBuffer
+}
+
+private func appendPixelBufferForImage(
+  _ image: CIImage,
+  context: CIContext,
+  pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor,
+  presentationTime: CMTime
+) -> Bool {
+  /// at the beginning of the append the status is false
+  var appendSucceeded = false
+  
+  /**
+   *  The proccess of appending new pixels is put inside a autoreleasepool
+   */
+  autoreleasepool {
+    // check posibilitty of creating a pixel buffer pool
+    if let pixelBufferPool = pixelBufferAdaptor.pixelBufferPool {
+      let pixelBufferPointer = UnsafeMutablePointer<CVPixelBuffer?>.allocate(capacity: MemoryLayout<CVPixelBuffer?>.size)
+      let status: CVReturn = CVPixelBufferPoolCreatePixelBuffer(
+        kCFAllocatorDefault,
+        pixelBufferPool,
+        pixelBufferPointer
+      )
+      
+      //        let _buffer = buffer(from: image)!
+      
+      /// check if the memory of the pixel buffer pointer can be accessed and the creation status is 0
+      if let pixelBuffer = pixelBufferPointer.pointee,
+         status == 0 {
+        // if the condition is satisfied append the image pixels to the pixel buffer pool
+        //        fillPixelBufferFromImage(image, pixelBuffer: pixelBuffer)
+        context.render(image, to: pixelBuffer)
+        // generate new append status
+        appendSucceeded = pixelBufferAdaptor.append(
+          pixelBuffer,
+          withPresentationTime: presentationTime
+        )
+        
+        /**
+         *  Destroy the pixel buffer contains
+         */
+        pixelBufferPointer.deinitialize(count: 1)
+      } else {
+        NSLog("error: Failed to allocate pixel buffer from pool")
+      }
+      
+      /**
+       Destroy the pixel buffer pointer from the memory
+       */
+      pixelBufferPointer.deallocate()
+    }
+  }
+  
+  return appendSucceeded
 }
 
 /*
