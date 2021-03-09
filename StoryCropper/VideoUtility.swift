@@ -11,10 +11,6 @@ import CoreImage
 import UNILib
 import Combine
 
-let ctx = CIContext(mtlDevice: MTLCreateSystemDefaultDevice()!)
-
-let fileType = AVFileType.mp4
-
 func uniqueURL() -> URL {
   let id = UUID()
   
@@ -61,156 +57,6 @@ func makeFlowVideo1(
   .eraseToAnyPublisher()
 }
 
-func makeFlowVideo(
-  _ assetURL: URL
-) -> AnyPublisher<(AVAsset, AVVideoComposition), Never> {
-  let duration = 10.0
-  
-  return makeVideo(assetURL, duration: 1)
-    .map { asset in processVideo(asset, targetDuration: Int(duration)) }
-    .eraseToAnyPublisher()
-}
-
-func scaleAsset(_ asset: AVAsset, to targetDuration: TimeInterval) -> AVAsset {
-  let composition = AVMutableComposition()
-  let track = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid)!
-  let timeRangeToInsert: CMTimeRange = CMTimeRange(start: .zero, duration: asset.duration)
-  let targetDuration = CMTime(seconds: targetDuration, preferredTimescale: timeRangeToInsert.duration.timescale)
-  try! track.insertTimeRange(timeRangeToInsert, of: asset.tracks(withMediaType: .video)[0], at: .zero)
-  track.scaleTimeRange(timeRangeToInsert, toDuration: targetDuration)
-  return composition
-}
-
-func processVideo(_ inputAsset: AVAsset, targetDuration: Int) -> (AVAsset, AVVideoComposition) {
-
-  let composition = AVMutableComposition()
-  let renderSize = CGSize(width: 1080, height: 1920)
-  
-  let videoTrack = composition.addMutableTrack(
-    withMediaType: .video,
-    preferredTrackID: kCMPersistentTrackID_Invalid
-  )!
-  let audioTrack = composition.addMutableTrack(
-    withMediaType: .audio,
-    preferredTrackID: kCMPersistentTrackID_Invalid
-  )!
-  
-  let audioAsset = AVAsset(url: Bundle.main.url(forResource: "1-second-of-silence", withExtension: "mp3")!)
-  try! audioTrack.insertTimeRange(
-    .init(
-      start: .zero,
-      duration: audioAsset.duration
-    ),
-    of: audioAsset.tracks(withMediaType: .audio)[0],
-    at: .zero
-  )
-  
-  var cursor = CMTime.zero
-  (0..<targetDuration).forEach { (asset) in
-    try! videoTrack.insertTimeRange(
-      CMTimeRange(start: .zero, duration: inputAsset.duration),
-      of: inputAsset.tracks(withMediaType: .video)[0],
-      at: cursor
-    )
-    cursor = cursor + inputAsset.duration
-  }
-  
-  let videoComposition = AVMutableVideoComposition(asset: composition) { (request) in
-    
-    let progress = request.compositionTime.seconds / composition.duration.seconds
-    
-    let params = scaleAndPositionInAspectFillMode(request.sourceImage.extent.size, in: renderSize)
-    let filled = request.sourceImage >>> params
-    
-    let maxOffset = filled.extent.width - renderSize.width
-    let offset = CGFloat(progress) * maxOffset
-    
-    let translated = filled
-      .transformed(by: .init(translationX: -params.position.x, y: 0))
-      .transformed(by: .init(translationX: -offset, y: 0))
-      .cropped(to: .init(origin: .zero, size: renderSize))
-    
-    request.finish(with: translated, context: ctx)
-  }
-  composition.naturalSize = renderSize
-  videoComposition.renderSize = renderSize
-  
-  return (composition, videoComposition)
-}
-
-func makeVideo(
-  _ assetURL: URL,
-  duration: TimeInterval
-) -> AnyPublisher<AVAsset, Never> {
-  
-  let image = UIImage(contentsOfFile: assetURL.path)!
-  let url = uniqueURL()
-  
-  return Future { p in
-    createVideoFromImageSync(image, duration: duration, outputURL: url, progress: nil) { (asset) in
-      p(.success(asset))
-    }
-  }
-  .receive(on: DispatchQueue.global(qos: .utility))
-  .eraseToAnyPublisher()
-}
-
-func compatibleWith(asset: AVAsset) -> [String] {
-  let allPresets = AVAssetExportSession.allExportPresets()
-  let lock = DispatchSemaphore(value: 0)
-  var reg = allPresets.reduce(into: [String: Bool]()) { (acc, preset) in
-    acc[preset] = false
-  }
-  
-  for preset in allPresets {
-    lock.wait()
-    AVAssetExportSession.determineCompatibility(
-      ofExportPreset: preset,
-      with: asset,
-      outputFileType: fileType
-    ) { (value) in
-      reg[preset] = value
-      lock.signal()
-    }
-    lock.wait()
-  }
-  
-  return reg.filter { $0.1 }.map { $0.0 }
-}
-
-func export(
-  _ composition: AVAsset,
-  videoComposition: AVVideoComposition?,
-  _ url: URL,
-  _ callback: @escaping (URL) -> Void
-) {
-
-  let compatiblePresets = compatibleWith(asset: composition)
-  
-  let exportSession = AVAssetExportSession(
-    asset: composition,
-    presetName: compatiblePresets.first ?? AVAssetExportPresetHighestQuality
-  )!
-  exportSession.videoComposition = videoComposition
-  
-  exportSession.outputURL = url
-  exportSession.timeRange = .init(start: .zero, duration: composition.duration)
-  exportSession.shouldOptimizeForNetworkUse = true
-  exportSession.determineCompatibleFileTypes { (types) in
-    print(types)
-    print(exportSession.supportedFileTypes)
-    exportSession.outputFileType = types.first ?? fileType
-  }
-  exportSession.exportAsynchronously {
-    switch exportSession.status {
-    case .completed:
-      callback(exportSession.outputURL!)
-    default:
-      fatalError()
-    }
-  }
-}
-
 private let frameDuration = CMTime(value: 1, timescale: 30)
 
 private func createVideoFromImageSync1(
@@ -223,7 +69,7 @@ private func createVideoFromImageSync1(
   result: @escaping (AVAsset) -> Void
 ) {
   
-  let videoWriter = try! AVAssetWriter(outputURL: outputURL, fileType: fileType)
+  let videoWriter = try! AVAssetWriter(outputURL: outputURL, fileType: AVFileType.mp4)
   
   /// create the basic video settings
   let videoSettings: [String: Any] = [
@@ -293,104 +139,9 @@ private func createVideoFromImageSync1(
       ) {
         fatalError()
       }
-//      if !appendPixelBufferForImage(
-//        image,
-//        pixelBufferAdaptor: pixelBufferAdaptor,
-//        presentationTime: nextStartTimeForFrame
-//      ) {
-//        fatalError()
-//      }
+
       print("Appended frame at \(nextStartTimeForFrame.seconds) for \(outputURL.lastPathComponent)")
       
-      progress?(percentComplete)
-      nextStartTimeForFrame = nextStartTimeForFrame + frameDuration
-    }
-    
-    videoWriterInput.markAsFinished()
-    
-    videoWriter.finishWriting {
-      let asset = AVAsset(url: outputURL)
-      print("Asset duration - \(asset.duration.seconds)")
-      result(asset)
-    }
-  }
-}
-
-
-private func createVideoFromImageSync(
-  _ image: UIImage,
-  duration: TimeInterval,
-  outputURL: URL,
-  progress: ((Double) -> Void)?,
-  result: @escaping (AVAsset) -> Void
-) {
-  
-  let size = image.size
-  
-  let videoWriter = try! AVAssetWriter(outputURL: outputURL, fileType: fileType)
-  
-  /// create the basic video settings
-  let videoSettings: [String: Any] = [
-    AVVideoCodecKey: AVVideoCodecType.h264,
-    AVVideoWidthKey: size.width,
-    AVVideoHeightKey: size.height,
-  ]
-  
-  /// create a video writter input
-  let videoWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
-  
-  /// create setting for the pixel buffer
-  let sourceBufferAttributes: [String: Any] = [
-    kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32ARGB),
-    kCVPixelBufferWidthKey as String: Float(size.width),
-    kCVPixelBufferHeightKey as String: Float(size.height),
-    kCVPixelBufferCGImageCompatibilityKey as String: NSNumber(value: true),
-    kCVPixelBufferCGBitmapContextCompatibilityKey as String: NSNumber(value: true)
-  ]
-  
-  /// create pixel buffer for the input writter and the pixel buffer settings
-  let pixelBufferAdaptor =
-    AVAssetWriterInputPixelBufferAdaptor(
-      assetWriterInput: videoWriterInput,
-      sourcePixelBufferAttributes: sourceBufferAttributes
-    )
-  
-  /// check if an input can be added to the asset
-  assert(videoWriter.canAdd(videoWriterInput))
-  
-  /// add the input writter to the video asset
-  videoWriter.add(videoWriterInput)
-  
-  while !videoWriter.startWriting() {
-    print("Wait for start of writer for \(outputURL.lastPathComponent)")
-    Thread.sleep(forTimeInterval: 1)
-  }
-  
-  assert(pixelBufferAdaptor.pixelBufferPool != nil)
-  
-  let media_queue = DispatchQueue(label: "mediaInputQueue", autoreleaseFrequency: .workItem)
-  videoWriter.startSession(atSourceTime: CMTime.zero)
-  videoWriterInput.requestMediaDataWhenReady(on: media_queue) {
-    let frameCount = duration / frameDuration.seconds
-    print("Number of frames - \(frameCount)")
-    
-    var nextStartTimeForFrame = CMTime.zero
-    
-    while nextStartTimeForFrame.seconds < duration {
-      while !videoWriterInput.isReadyForMoreMediaData {
-        print("Wait append for \(outputURL.lastPathComponent)")
-        Thread.sleep(forTimeInterval: 0.1)
-      }
-      
-      if !appendPixelBufferForImage(
-        image,
-        pixelBufferAdaptor: pixelBufferAdaptor,
-        presentationTime: nextStartTimeForFrame
-      ) {
-        fatalError()
-      }
-      print("Appended frame at \(nextStartTimeForFrame.seconds) for \(outputURL.lastPathComponent)")
-      let percentComplete = nextStartTimeForFrame.seconds / duration
       progress?(percentComplete)
       nextStartTimeForFrame = nextStartTimeForFrame + frameDuration
     }
