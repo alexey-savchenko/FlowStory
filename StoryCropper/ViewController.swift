@@ -9,92 +9,45 @@ import UIKit
 import Photos
 import MobileCoreServices
 import Combine
-
-class PlayerView: UIView {
-  
-  let player: AVPlayer
-  
-  lazy var gesture: UITapGestureRecognizer = {
-    return UITapGestureRecognizer(target: self, action: #selector(restartPlayer))
-  }()
-  
-  init(player: AVPlayer) {
-    self.player = player
-    super.init(frame: .zero)
-    
-    playerLayer.player = player
-    isUserInteractionEnabled = true
-    addGestureRecognizer(gesture)
-  }
-  
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
-  
-  var playerLayer: AVPlayerLayer {
-    return layer as! AVPlayerLayer
-  }
-  
-  override class var layerClass: AnyClass {
-    return AVPlayerLayer.self
-  }
-  
-  @objc func restartPlayer() {
-    player.seek(to: .zero)
-    player.play()
-  }
-}
+import UNILib
 
 class ViewController: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
   
-  lazy var addButtonItem: UIBarButtonItem = {
-    return UIBarButtonItem(
-      title: "Add",
-      style: .done,
-      target: self,
-      action: #selector(openPicker)
-    )
-  }()
-  
-  let player = AVPlayer()
-  lazy var playerView: PlayerView = {
-    return PlayerView(player: player)
-  }()
-  let progressBar = UIProgressView(progressViewStyle: .bar)
-  
-  var token: Any?
-  
+  let addButton = UIButton()
+  let circularProgressBarView = CircularProgressBarView()
+
   private var disposeBag = Set<AnyCancellable>()
   
   override func viewDidLoad() {
     super.viewDidLoad()
     
+    view.backgroundColor = .lightGray
+    
     try! FileManager.default.contentsOfDirectory(atPath: FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].path)
       .forEach {
         try? FileManager.default.removeItem(atPath: $0)
       }
+    navigationController?.setNavigationBarHidden(true, animated: false)
+
+    [circularProgressBarView, addButton]
+      .forEach {
+        view.addSubview($0)
+        $0.translatesAutoresizingMaskIntoConstraints = false
+      }
     
-    navigationItem.rightBarButtonItems = [addButtonItem]
-    [playerView, progressBar].forEach(view.addSubview)
-    playerView.translatesAutoresizingMaskIntoConstraints = false
-    progressBar.translatesAutoresizingMaskIntoConstraints = false
     NSLayoutConstraint.activate(
       [
-        progressBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-        progressBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-        progressBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-        playerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-        playerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-        playerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-        playerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        circularProgressBarView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+        circularProgressBarView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+        circularProgressBarView.widthAnchor.constraint(equalToConstant: 250),
+        circularProgressBarView.heightAnchor.constraint(equalToConstant: 250),
+        addButton.centerXAnchor.constraint(equalTo: circularProgressBarView.centerXAnchor),
+        addButton.centerYAnchor.constraint(equalTo: circularProgressBarView.centerYAnchor),
       ]
     )
-    
-    token = player.addPeriodicTimeObserver(forInterval: CMTime(value: 1, timescale: 60), queue: nil) { (time) in
-      if let duration = self.player.currentItem?.duration.seconds {
-        self.progressBar.progress = Float(time.seconds / duration)
-      }
-    }
+    circularProgressBarView.progress = 0
+    addButton.setTitle("Select Photo", for: .normal)
+    addButton.addTarget(self, action: #selector(openPicker), for: .touchUpInside)
   }
   
   @objc func openPicker() {
@@ -126,17 +79,51 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
   }
   
   func selectedVideoWith(_ assetURL: URL) {
-    makeFlowVideo(assetURL: assetURL)
+    addButton.isHidden = true
+    circularProgressBarView.layer.opacity = 1
+    let sourceStream = makeFlowVideo(assetURL: assetURL).share()
+
+    sourceStream
+      .compactMap { $0.right }
+      .receive(on: DispatchQueue.main)
+      .sink { [weak self] progress in
+        self?.circularProgressBarView.progress = progress
+      }
+      .store(in: &disposeBag)
+    
+    sourceStream
+      .compactMap { $0.left }
       .map { asset in return (asset as! AVURLAsset).url }
-      .sink { url in
-        if let error = self.saveVideoToAlbum(url) {
-          print(error)
+      .receive(on: DispatchQueue.main)
+      .sink { [weak self] url in
+        self?.circularProgressBarView.progress = 0
+        self?.animateProgressBarDismiss()
+        self?.addButton.isHidden = false
+        if let error = self?.saveVideoToAlbum(url) {
+          self?.presentSystemAlert(error: error)
         } else {
           print("success")
         }
-        
       }
       .store(in: &disposeBag)
+  }
+  
+  func animateProgressBarDismiss() {
+    let animation0 = CABasicAnimation(keyPath: "opacity")
+    let animation1 = CABasicAnimation(keyPath: "transform")
+    
+    animation0.fromValue = 1
+    animation0.toValue = 0
+    
+    animation1.fromValue = CATransform3DIdentity
+    animation1.toValue = CATransform3DMakeScale(5, 5, 1)
+    
+    let animationgroup = CAAnimationGroup()
+    animationgroup.animations = [animation0, animation1]
+    animationgroup.duration = 0.5
+    
+    circularProgressBarView.layer.opacity = 0
+    circularProgressBarView.layer.add(animationgroup, forKey: nil)
   }
   
   func requestAuthorization(completion: @escaping () -> Void) {

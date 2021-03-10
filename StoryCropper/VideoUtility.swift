@@ -23,11 +23,12 @@ func uniqueURL() -> URL {
 
 func makeFlowVideo(
   assetURL: URL
-) -> AnyPublisher<AVAsset, Never> {
+) -> AnyPublisher<Either<AVAsset, Double>, Never> {
   let image = UIImage(contentsOfFile: assetURL.path)!
   let url = uniqueURL()
   let renderSize = CGSize(width: 1080, height: 1920)
-  return Future { promise in
+  return AnyPublisher.create { (obs) -> Disposable in
+    
     createVideoFromImageSync(
       image,
       size: renderSize,
@@ -48,13 +49,14 @@ func makeFlowVideo(
       
       return translated
     } progress: { (progress) in
-      print(progress)
-    } result: { (asset) in
-      promise(.success(asset))
-    }
 
+      obs.onNext(.right(value: progress))
+    } result: { (asset) in
+      obs.onNext(.left(value: asset))
+    }
+    
+    return Disposable.create
   }
-  .eraseToAnyPublisher()
 }
 
 private let frameDuration = CMTime(value: 1, timescale: 30)
