@@ -23,6 +23,7 @@ class CircularProgressBarView: UIView {
     super.init(frame: frame)
     
     [trackLayer, progressLayer].forEach(layer.addSublayer)
+    progressLayer.transform = CATransform3DMakeAffineTransform(.init(rotationAngle: -(.pi / 2)))
   }
   
   required init?(coder: NSCoder) {
@@ -42,7 +43,6 @@ class CircularProgressBarView: UIView {
     let maxTrackWidth: CGFloat = 32
     let minTrackWidth: CGFloat = 8
     let actualTrackWidth = maxTrackWidth + ((1.0 - CGFloat(progress)) * (minTrackWidth - maxTrackWidth))
-//      maxTrackWidth - ((1.0 - CGFloat(progress)) * minTrackWidth)
     
     let trackPath = UIBezierPath(ovalIn: bounds)
     trackLayer.lineWidth = actualTrackWidth

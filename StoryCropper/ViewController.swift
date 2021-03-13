@@ -11,10 +11,24 @@ import MobileCoreServices
 import Combine
 import UNILib
 
-class ViewController: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+class ViewController: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate, CAAnimationDelegate {
   
   let addButton = UIButton()
   let circularProgressBarView = CircularProgressBarView()
+  
+  let playerView = PlayerView(player: AVPlayer())
+  let shareStackView = UIStackView()
+  let instagramShareButton = UIButton()
+  let shareButton = UIButton()
+  let infoLabel = UILabel()
+  let maskLayer = CAGradientLayer()
+  
+  var lastExportedURL: URL?
+  var playerObservationToken: Any?
+  
+  lazy var stackViewBottomConstraint: NSLayoutConstraint = {
+    return shareStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
+  }()
 
   private var disposeBag = Set<AnyCancellable>()
   
@@ -28,13 +42,19 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         try? FileManager.default.removeItem(atPath: $0)
       }
     navigationController?.setNavigationBarHidden(true, animated: false)
-
-    [circularProgressBarView, addButton]
-      .forEach {
-        view.addSubview($0)
-        $0.translatesAutoresizingMaskIntoConstraints = false
-      }
     
+    [
+      circularProgressBarView,
+      addButton,
+      infoLabel,
+      playerView,
+      shareStackView,
+    ]
+    .forEach {
+      view.addSubview($0)
+      $0.translatesAutoresizingMaskIntoConstraints = false
+    }
+      
     NSLayoutConstraint.activate(
       [
         circularProgressBarView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -43,11 +63,92 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         circularProgressBarView.heightAnchor.constraint(equalToConstant: 250),
         addButton.centerXAnchor.constraint(equalTo: circularProgressBarView.centerXAnchor),
         addButton.centerYAnchor.constraint(equalTo: circularProgressBarView.centerYAnchor),
+        stackViewBottomConstraint,
+        shareStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+        infoLabel.centerXAnchor.constraint(equalTo: circularProgressBarView.centerXAnchor),
+        infoLabel.centerYAnchor.constraint(equalTo: circularProgressBarView.centerYAnchor),
+        playerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+        playerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        playerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        playerView.heightAnchor.constraint(equalToConstant: 250)
       ]
     )
     circularProgressBarView.progress = 0
-    addButton.setTitle("Select Photo", for: .normal)
+    addButton.setAttributedTitle(
+      .init(
+        string: "Select photo",
+        attributes: [.font: UIFont.boldSystemFont(ofSize: 32),
+                     .foregroundColor: UIColor.white]
+      ),
+      for: .normal
+    )
     addButton.addTarget(self, action: #selector(openPicker), for: .touchUpInside)
+    infoLabel.attributedText = .init(
+      string: "Rendering...",
+      attributes: [.font: UIFont.boldSystemFont(ofSize: 32),
+                   .foregroundColor: UIColor.white]
+    )
+    infoLabel.alpha = 0
+    
+    [instagramShareButton, shareButton].forEach {
+      $0.layer.cornerRadius = 16
+      $0.layer.borderWidth = 2
+      $0.layer.borderColor = UIColor.orange.cgColor
+      shareStackView.addArrangedSubview($0)
+      $0.translatesAutoresizingMaskIntoConstraints = false
+      NSLayoutConstraint.activate(
+        [
+          $0.heightAnchor.constraint(equalToConstant: 48),
+        ]
+      )
+    }
+    
+    instagramShareButton.setTitle("Instagram", for: .normal)
+    shareButton.setTitle("Export", for: .normal)
+    
+    instagramShareButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+    shareButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+
+    shareStackView.axis = .horizontal
+    shareStackView.spacing = 24
+    shareStackView.alignment = .center
+    shareStackView.alpha = 0
+    
+    instagramShareButton.addTarget(self, action: #selector(shareToInstagram), for: .touchUpInside)
+    shareButton.addTarget(self, action: #selector(openIn), for: .touchUpInside)
+    
+    playerView.isHidden = true
+    playerView.playerLayer.videoGravity = .resizeAspectFill
+    playerView.clipsToBounds = true
+    playerView.layer.mask = maskLayer
+    playerObservationToken = playerView.player.addPeriodicTimeObserver(forInterval: CMTimeMake(value: 1, timescale: 60), queue: nil) { [unowned playerView] (time) in
+      if time == playerView.player.currentItem?.duration {
+        playerView.player.seek(to: .zero)
+        playerView.player.play()
+      }
+    }
+    
+    maskLayer.colors = [UIColor.black.withAlphaComponent(0).cgColor, UIColor.black.cgColor]
+  }
+  
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    
+    maskLayer.frame = playerView.bounds
+  }
+  
+  @objc func shareToInstagram() {
+    if let asset = lastPHAssetInCameraRoll() {
+      let url = URL(string: "instagram://library?OpenInEditor=1&LocalIdentifier=\(asset.localIdentifier)")!
+      if UIApplication.shared.canOpenURL(url) {
+        UIApplication.shared.open(url)
+      }
+    }
+  }
+  
+  @objc func openIn() {
+    let c = UIActivityViewController(activityItems: [lastExportedURL!], applicationActivities: nil)
+    self.present(c, animated: true)
   }
   
   @objc func openPicker() {
@@ -79,7 +180,11 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
   }
   
   func selectedVideoWith(_ assetURL: URL) {
-    addButton.isHidden = true
+    playerView.isHidden = true
+    infoLabel.alpha = 1
+    stackViewBottomConstraint.constant = 16
+    addButton.alpha = 0
+    shareStackView.alpha = 0
     circularProgressBarView.layer.opacity = 1
     let sourceStream = makeFlowVideo(assetURL: assetURL).share()
 
@@ -96,13 +201,29 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
       .map { asset in return (asset as! AVURLAsset).url }
       .receive(on: DispatchQueue.main)
       .sink { [weak self] url in
-        self?.circularProgressBarView.progress = 0
+        self?.lastExportedURL = url
+        self?.infoLabel.alpha = 0
         self?.animateProgressBarDismiss()
-        self?.addButton.isHidden = false
+        self?.addButton.alpha = 1
+        self?.addButton.setAttributedTitle(
+          .init(
+            string: "Select another photo",
+            attributes: [.font: UIFont.boldSystemFont(ofSize: 32),
+                         .foregroundColor: UIColor.white]
+          ),
+          for: .normal
+        )
         if let error = self?.saveVideoToAlbum(url) {
           self?.presentSystemAlert(error: error)
         } else {
-          print("success")
+          self?.playerView.isHidden = false
+          self?.playerView.player.replaceCurrentItem(with: .init(url: url))
+          self?.playerView.player.play()
+          self?.stackViewBottomConstraint.constant = -16
+          UIView.animate(withDuration: 0.3) {
+            self?.shareStackView.alpha = 1
+            self?.view.layoutIfNeeded()
+          }
         }
       }
       .store(in: &disposeBag)
@@ -121,6 +242,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     let animationgroup = CAAnimationGroup()
     animationgroup.animations = [animation0, animation1]
     animationgroup.duration = 0.5
+    animationgroup.delegate = self
     
     circularProgressBarView.layer.opacity = 0
     circularProgressBarView.layer.add(animationgroup, forKey: nil)
@@ -145,5 +267,21 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     } catch {
       return error
     }
+  }
+  
+  func lastPHAssetInCameraRoll() -> PHAsset? {
+    let ops = PHFetchOptions()
+    ops.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+    let fetchResult = PHAsset.fetchAssets(with: .video, options: ops)
+    var phAssets = [PHAsset]()
+    fetchResult.enumerateObjects { asset, idx, _ in
+      phAssets.append(asset)
+    }
+    let lastAsset = phAssets.first
+    return lastAsset
+  }
+  
+  func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
+    circularProgressBarView.progress = 0
   }
 }
