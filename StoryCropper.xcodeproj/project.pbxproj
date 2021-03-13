@@ -10,20 +10,23 @@
 		2254711B25EA803F00B4ECA3 /* UNILib in Frameworks */ = {isa = PBXBuildFile; productRef = 2254711A25EA803F00B4ECA3 /* UNILib */; };
 		2254711F25EA964300B4ECA3 /* Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2254711E25EA964300B4ECA3 /* Ext.swift */; };
 		2257A1A325B07DDA001F0A99 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2257A1A225B07DDA001F0A99 /* AppDelegate.swift */; };
-		2257A1A725B07DDA001F0A99 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2257A1A625B07DDA001F0A99 /* ViewController.swift */; };
+		2257A1A725B07DDA001F0A99 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2257A1A625B07DDA001F0A99 /* MainViewController.swift */; };
 		2257A1AC25B07DDC001F0A99 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2257A1AB25B07DDC001F0A99 /* Assets.xcassets */; };
 		2257A1AF25B07DDC001F0A99 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2257A1AD25B07DDC001F0A99 /* LaunchScreen.storyboard */; };
 		2257A1B925B07F5A001F0A99 /* VideoUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2257A1B825B07F5A001F0A99 /* VideoUtility.swift */; };
 		227056C625F8E21500D37103 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227056C525F8E21500D37103 /* PlayerView.swift */; };
 		227056CA25F8E46E00D37103 /* CircularProgressBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227056C925F8E46E00D37103 /* CircularProgressBarView.swift */; };
 		227056CD25F8F8CC00D37103 /* AnyPublisher+Create.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227056CC25F8F8CC00D37103 /* AnyPublisher+Create.swift */; };
+		227056D125FCC42400D37103 /* BlurBackgroundController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227056D025FCC42400D37103 /* BlurBackgroundController.swift */; };
+		227056D525FCC52500D37103 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 227056D425FCC52500D37103 /* SnapKit */; };
+		227056D825FCC7DF00D37103 /* FlowDirectionSelectController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227056D725FCC7DF00D37103 /* FlowDirectionSelectController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		2254711E25EA964300B4ECA3 /* Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ext.swift; sourceTree = "<group>"; };
 		2257A19F25B07DDA001F0A99 /* StoryCropper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StoryCropper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2257A1A225B07DDA001F0A99 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		2257A1A625B07DDA001F0A99 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		2257A1A625B07DDA001F0A99 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		2257A1AB25B07DDC001F0A99 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2257A1AE25B07DDC001F0A99 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		2257A1B025B07DDC001F0A99 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -31,6 +34,8 @@
 		227056C525F8E21500D37103 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 		227056C925F8E46E00D37103 /* CircularProgressBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularProgressBarView.swift; sourceTree = "<group>"; };
 		227056CC25F8F8CC00D37103 /* AnyPublisher+Create.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AnyPublisher+Create.swift"; sourceTree = "<group>"; };
+		227056D025FCC42400D37103 /* BlurBackgroundController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurBackgroundController.swift; sourceTree = "<group>"; };
+		227056D725FCC7DF00D37103 /* FlowDirectionSelectController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowDirectionSelectController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,6 +44,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2254711B25EA803F00B4ECA3 /* UNILib in Frameworks */,
+				227056D525FCC52500D37103 /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -67,13 +73,15 @@
 				2257A1A225B07DDA001F0A99 /* AppDelegate.swift */,
 				2257A1B825B07F5A001F0A99 /* VideoUtility.swift */,
 				227056C925F8E46E00D37103 /* CircularProgressBarView.swift */,
-				2257A1A625B07DDA001F0A99 /* ViewController.swift */,
+				2257A1A625B07DDA001F0A99 /* MainViewController.swift */,
 				2257A1AB25B07DDC001F0A99 /* Assets.xcassets */,
 				2257A1AD25B07DDC001F0A99 /* LaunchScreen.storyboard */,
 				2257A1B025B07DDC001F0A99 /* Info.plist */,
 				2254711E25EA964300B4ECA3 /* Ext.swift */,
 				227056C525F8E21500D37103 /* PlayerView.swift */,
 				227056CC25F8F8CC00D37103 /* AnyPublisher+Create.swift */,
+				227056D025FCC42400D37103 /* BlurBackgroundController.swift */,
+				227056D725FCC7DF00D37103 /* FlowDirectionSelectController.swift */,
 			);
 			path = StoryCropper;
 			sourceTree = "<group>";
@@ -96,6 +104,7 @@
 			name = StoryCropper;
 			packageProductDependencies = (
 				2254711A25EA803F00B4ECA3 /* UNILib */,
+				227056D425FCC52500D37103 /* SnapKit */,
 			);
 			productName = StoryCropper;
 			productReference = 2257A19F25B07DDA001F0A99 /* StoryCropper.app */;
@@ -126,6 +135,7 @@
 			mainGroup = 2257A19625B07DDA001F0A99;
 			packageReferences = (
 				2254711925EA803F00B4ECA3 /* XCRemoteSwiftPackageReference "UNILib" */,
+				227056D325FCC52500D37103 /* XCRemoteSwiftPackageReference "SnapKit" */,
 			);
 			productRefGroup = 2257A1A025B07DDA001F0A99 /* Products */;
 			projectDirPath = "";
@@ -155,11 +165,13 @@
 			files = (
 				227056C625F8E21500D37103 /* PlayerView.swift in Sources */,
 				2257A1B925B07F5A001F0A99 /* VideoUtility.swift in Sources */,
+				227056D125FCC42400D37103 /* BlurBackgroundController.swift in Sources */,
 				2254711F25EA964300B4ECA3 /* Ext.swift in Sources */,
-				2257A1A725B07DDA001F0A99 /* ViewController.swift in Sources */,
+				2257A1A725B07DDA001F0A99 /* MainViewController.swift in Sources */,
 				227056CA25F8E46E00D37103 /* CircularProgressBarView.swift in Sources */,
 				2257A1A325B07DDA001F0A99 /* AppDelegate.swift in Sources */,
 				227056CD25F8F8CC00D37103 /* AnyPublisher+Create.swift in Sources */,
+				227056D825FCC7DF00D37103 /* FlowDirectionSelectController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -365,6 +377,14 @@
 				kind = branch;
 			};
 		};
+		227056D325FCC52500D37103 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -372,6 +392,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2254711925EA803F00B4ECA3 /* XCRemoteSwiftPackageReference "UNILib" */;
 			productName = UNILib;
+		};
+		227056D425FCC52500D37103 /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 227056D325FCC52500D37103 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

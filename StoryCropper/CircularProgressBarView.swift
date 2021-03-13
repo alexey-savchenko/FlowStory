@@ -19,11 +19,22 @@ class CircularProgressBarView: UIView {
     }
   }
   
+  fileprivate func setupUI() {
+    [trackLayer, progressLayer].forEach(layer.addSublayer)
+    
+    let rotationAnimation = CABasicAnimation(keyPath: "transform.rotation")
+    rotationAnimation.fromValue = 0
+    rotationAnimation.toValue = Double.pi * 2
+    rotationAnimation.duration = 2
+    rotationAnimation.repeatCount = .infinity
+    
+    progressLayer.add(rotationAnimation, forKey: nil)
+  }
+  
   override init(frame: CGRect) {
     super.init(frame: frame)
     
-    [trackLayer, progressLayer].forEach(layer.addSublayer)
-    progressLayer.transform = CATransform3DMakeAffineTransform(.init(rotationAngle: -(.pi / 2)))
+    setupUI()
   }
   
   required init?(coder: NSCoder) {

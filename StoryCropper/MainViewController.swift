@@ -10,8 +10,9 @@ import Photos
 import MobileCoreServices
 import Combine
 import UNILib
+import SnapKit
 
-class ViewController: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate, CAAnimationDelegate {
+class MainViewController: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate, CAAnimationDelegate {
   
   let addButton = UIButton()
   let circularProgressBarView = CircularProgressBarView()
@@ -26,9 +27,10 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
   var lastExportedURL: URL?
   var playerObservationToken: Any?
   
-  lazy var stackViewBottomConstraint: NSLayoutConstraint = {
-    return shareStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
-  }()
+  var stackViewBottomConstraint: ConstraintMakerEditable?
+//  lazy var stackViewBottomConstraint: NSLayoutConstraint = {
+//    return shareStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
+//  }()
 
   private var disposeBag = Set<AnyCancellable>()
   
@@ -44,35 +46,37 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     navigationController?.setNavigationBarHidden(true, animated: false)
     
     [
+      playerView,
       circularProgressBarView,
       addButton,
       infoLabel,
-      playerView,
       shareStackView,
     ]
-    .forEach {
-      view.addSubview($0)
-      $0.translatesAutoresizingMaskIntoConstraints = false
+    .forEach(view.addSubview)
+    
+    circularProgressBarView.snp.makeConstraints { (make) in
+      make.size.equalTo(250)
+      make.center.equalToSuperview()
     }
-      
-    NSLayoutConstraint.activate(
-      [
-        circularProgressBarView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-        circularProgressBarView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-        circularProgressBarView.widthAnchor.constraint(equalToConstant: 250),
-        circularProgressBarView.heightAnchor.constraint(equalToConstant: 250),
-        addButton.centerXAnchor.constraint(equalTo: circularProgressBarView.centerXAnchor),
-        addButton.centerYAnchor.constraint(equalTo: circularProgressBarView.centerYAnchor),
-        stackViewBottomConstraint,
-        shareStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-        infoLabel.centerXAnchor.constraint(equalTo: circularProgressBarView.centerXAnchor),
-        infoLabel.centerYAnchor.constraint(equalTo: circularProgressBarView.centerYAnchor),
-        playerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-        playerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-        playerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-        playerView.heightAnchor.constraint(equalToConstant: 250)
-      ]
-    )
+    
+    addButton.snp.makeConstraints { (make) in
+      make.center.equalTo(circularProgressBarView)
+    }
+    
+    shareStackView.snp.makeConstraints { (make) in
+      self.stackViewBottomConstraint = make.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(-16)
+      make.centerX.equalToSuperview()
+    }
+    
+    infoLabel.snp.makeConstraints { (make) in
+      make.center.equalTo(circularProgressBarView)
+    }
+    
+    playerView.snp.makeConstraints { (make) in
+      make.leading.bottom.trailing.equalToSuperview()
+      make.top.equalTo(circularProgressBarView)
+    }
+    
     circularProgressBarView.progress = 0
     addButton.setAttributedTitle(
       .init(
@@ -92,15 +96,12 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     
     [instagramShareButton, shareButton].forEach {
       $0.layer.cornerRadius = 16
-      $0.layer.borderWidth = 2
-      $0.layer.borderColor = UIColor.orange.cgColor
+      $0.backgroundColor = UIColor.orange
+      $0.clipsToBounds = true
       shareStackView.addArrangedSubview($0)
-      $0.translatesAutoresizingMaskIntoConstraints = false
-      NSLayoutConstraint.activate(
-        [
-          $0.heightAnchor.constraint(equalToConstant: 48),
-        ]
-      )
+      $0.snp.makeConstraints { (make) in
+        make.height.equalTo(48)
+      }
     }
     
     instagramShareButton.setTitle("Instagram", for: .normal)
@@ -182,7 +183,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
   func selectedVideoWith(_ assetURL: URL) {
     playerView.isHidden = true
     infoLabel.alpha = 1
-    stackViewBottomConstraint.constant = 16
+    stackViewBottomConstraint?.constraint.update(offset: 16)
+    view.layoutIfNeeded()
     addButton.alpha = 0
     shareStackView.alpha = 0
     circularProgressBarView.layer.opacity = 1
@@ -219,7 +221,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
           self?.playerView.isHidden = false
           self?.playerView.player.replaceCurrentItem(with: .init(url: url))
           self?.playerView.player.play()
-          self?.stackViewBottomConstraint.constant = -16
+          self?.stackViewBottomConstraint?.constraint.update(offset: -16)
           UIView.animate(withDuration: 0.3) {
             self?.shareStackView.alpha = 1
             self?.view.layoutIfNeeded()
