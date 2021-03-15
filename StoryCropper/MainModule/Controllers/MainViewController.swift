@@ -83,7 +83,7 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
       ),
       for: .normal
     )
-    //    addButton.addTarget(self, action: #selector(openPicker), for: .touchUpInside)
+    
     infoLabel.attributedText = .init(
       string: "Rendering...",
       attributes: [.font: UIFont.boldSystemFont(ofSize: 32),
@@ -165,35 +165,7 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
     let c = UIActivityViewController(activityItems: [lastExportedURL!], applicationActivities: nil)
     self.present(c, animated: true)
   }
-  
-//  @objc func openPicker() {
-//    requestAuthorization {
-//      DispatchQueue.main.async {
-//        let picker = UIImagePickerController()
-//        picker.mediaTypes = [kUTTypeImage as String]
-//        picker.delegate = self
-//        picker.allowsEditing = false
-//        self.present(picker, animated: true)
-//      }
-//    }
-//  }
-//
-//  func imagePickerControllerDidCancel(
-//    _ picker: UIImagePickerController
-//  ) {
-//    picker.dismiss(animated: true)
-//  }
-//
-//  func imagePickerController(
-//    _ picker: UIImagePickerController,
-//    didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]
-//  ) {
-//    picker.dismiss(animated: true)
-//    if let videoURL = info[.imageURL] as? URL {
-//      selectedVideoWith(videoURL)
-//    }
-//  }
-  
+
   func render(state: State) {
     playerView.isHidden = true
     infoLabel.alpha = 0
@@ -247,53 +219,6 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
     }
   }
   
-//  func selectedVideoWith(_ assetURL: URL) {
-//    playerView.isHidden = true
-//    infoLabel.alpha = 1
-//    stackViewBottomConstraint?.constraint.update(offset: 16)
-//    view.layoutIfNeeded()
-//    addButton.alpha = 0
-//    shareStackView.alpha = 0
-//    circularProgressBarView.layer.opacity = 1
-//    let sourceStream = makeFlowVideo(assetURL: assetURL).share()
-//
-//    sourceStream
-//      .compactMap { $0.right }
-//      .receive(on: DispatchQueue.main)
-//      .sink { [weak self] progress in
-//        self?.circularProgressBarView.progress = progress
-//      }
-//      .store(in: &disposeBag)
-//
-//    sourceStream
-//      .compactMap { $0.left }
-//      .map { asset in return (asset as! AVURLAsset).url }
-//      .receive(on: DispatchQueue.main)
-//      .sink { [weak self] url in
-//        self?.lastExportedURL = url
-//        self?.infoLabel.alpha = 0
-//        self?.animateProgressBarDismiss()
-//        self?.addButton.alpha = 1
-//        self?.addButton.setAttributedTitle(
-//          .init(
-//            string: "Select another photo",
-//            attributes: [.font: UIFont.boldSystemFont(ofSize: 32),
-//                         .foregroundColor: UIColor.white]
-//          ),
-//          for: .normal
-//        )
-//
-//        self?.playerView.player.replaceCurrentItem(with: .init(url: url))
-//        self?.playerView.player.play()
-//        self?.stackViewBottomConstraint?.constraint.update(offset: -16)
-//        UIView.animate(withDuration: 0.3) {
-//          self?.shareStackView.alpha = 1
-//          self?.view.layoutIfNeeded()
-//        }
-//      }
-//      .store(in: &disposeBag)
-//  }
-  
   func animateProgressBarDismiss() {
     let animation0 = CABasicAnimation(keyPath: "opacity")
     let animation1 = CABasicAnimation(keyPath: "transform")
@@ -312,16 +237,6 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
     circularProgressBarView.layer.opacity = 0
     circularProgressBarView.layer.add(animationgroup, forKey: nil)
   }
-//  
-//  func requestAuthorization(completion: @escaping () -> Void) {
-//    if PHPhotoLibrary.authorizationStatus() == .authorized {
-//      completion()
-//    } else {
-//      PHPhotoLibrary.requestAuthorization { (status) in
-//        completion()
-//      }
-//    }
-//  }
   
   func lastPHAssetInCameraRoll() -> PHAsset? {
     let ops = PHFetchOptions()

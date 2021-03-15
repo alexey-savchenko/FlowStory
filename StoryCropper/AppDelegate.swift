@@ -28,10 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       .start()
       .sink(receiveValue: identity)
       .store(in: &disposeBag)
-//    let nav = UINavigationController(rootViewController: MainViewController())
-//    window?.rootViewController = nav
-//    window?.makeKeyAndVisible()
-//
+    
     return true
   }
 }

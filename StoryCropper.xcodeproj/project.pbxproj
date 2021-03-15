@@ -20,6 +20,9 @@
 		227056D525FCC52500D37103 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 227056D425FCC52500D37103 /* SnapKit */; };
 		227056D825FCC7DF00D37103 /* FlowDirectionSelectController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227056D725FCC7DF00D37103 /* FlowDirectionSelectController.swift */; };
 		227056E725FF8CCA00D37103 /* MainModuleCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227056E625FF8CCA00D37103 /* MainModuleCoordinator.swift */; };
+		227056EE25FF96A500D37103 /* FlowSelectionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227056ED25FF96A500D37103 /* FlowSelectionCoordinator.swift */; };
+		227056F325FF972B00D37103 /* FlowDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227056F225FF972B00D37103 /* FlowDirection.swift */; };
+		227056F825FF986A00D37103 /* FlowPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227056F725FF986A00D37103 /* FlowPreviewView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +39,9 @@
 		227056D025FCC42400D37103 /* BlurBackgroundController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurBackgroundController.swift; sourceTree = "<group>"; };
 		227056D725FCC7DF00D37103 /* FlowDirectionSelectController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowDirectionSelectController.swift; sourceTree = "<group>"; };
 		227056E625FF8CCA00D37103 /* MainModuleCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainModuleCoordinator.swift; sourceTree = "<group>"; };
+		227056ED25FF96A500D37103 /* FlowSelectionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowSelectionCoordinator.swift; sourceTree = "<group>"; };
+		227056F225FF972B00D37103 /* FlowDirection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowDirection.swift; sourceTree = "<group>"; };
+		227056F725FF986A00D37103 /* FlowPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowPreviewView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,7 +100,10 @@
 		227056DE25FF8C5300D37103 /* DirectionSelectionModule */ = {
 			isa = PBXGroup;
 			children = (
-				227056D725FCC7DF00D37103 /* FlowDirectionSelectController.swift */,
+				227056F625FF986100D37103 /* UI */,
+				227056F125FF972300D37103 /* Models */,
+				227056EC25FF969A00D37103 /* Coordinator */,
+				227056EA25FF969200D37103 /* Controller */,
 			);
 			path = DirectionSelectionModule;
 			sourceTree = "<group>";
@@ -132,6 +141,38 @@
 				227056E625FF8CCA00D37103 /* MainModuleCoordinator.swift */,
 			);
 			path = Coordinator;
+			sourceTree = "<group>";
+		};
+		227056EA25FF969200D37103 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				227056D725FCC7DF00D37103 /* FlowDirectionSelectController.swift */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		227056EC25FF969A00D37103 /* Coordinator */ = {
+			isa = PBXGroup;
+			children = (
+				227056ED25FF96A500D37103 /* FlowSelectionCoordinator.swift */,
+			);
+			path = Coordinator;
+			sourceTree = "<group>";
+		};
+		227056F125FF972300D37103 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				227056F225FF972B00D37103 /* FlowDirection.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		227056F625FF986100D37103 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				227056F725FF986A00D37103 /* FlowPreviewView.swift */,
+			);
+			path = UI;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -212,14 +253,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				227056C625F8E21500D37103 /* PlayerView.swift in Sources */,
+				227056F825FF986A00D37103 /* FlowPreviewView.swift in Sources */,
 				2257A1B925B07F5A001F0A99 /* VideoUtility.swift in Sources */,
 				227056D125FCC42400D37103 /* BlurBackgroundController.swift in Sources */,
 				2254711F25EA964300B4ECA3 /* Ext.swift in Sources */,
 				2257A1A725B07DDA001F0A99 /* MainViewController.swift in Sources */,
 				227056CA25F8E46E00D37103 /* CircularProgressBarView.swift in Sources */,
 				2257A1A325B07DDA001F0A99 /* AppDelegate.swift in Sources */,
+				227056F325FF972B00D37103 /* FlowDirection.swift in Sources */,
 				227056E725FF8CCA00D37103 /* MainModuleCoordinator.swift in Sources */,
 				227056D825FCC7DF00D37103 /* FlowDirectionSelectController.swift in Sources */,
+				227056EE25FF96A500D37103 /* FlowSelectionCoordinator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

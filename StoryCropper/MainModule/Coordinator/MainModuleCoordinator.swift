@@ -17,6 +17,7 @@ class MainModuleCoordinator: BaseCoordinator<Void>, UINavigationControllerDelega
   let navigationController = UINavigationController()
   let mainViewController = MainViewController()
   private var disposeBag = Set<AnyCancellable>()
+  let pickedURLPublisher = PassthroughSubject<URL, Never>()
   
   init(window: UIWindow) {
     self.window = window
@@ -30,11 +31,25 @@ class MainModuleCoordinator: BaseCoordinator<Void>, UINavigationControllerDelega
     
     mainViewController.addButton
       .publisher(for: .touchUpInside)
-      .do { _ in print("!!!") }
       .map(toVoid)
       .flatMap(requestAuthorization)
-      .sink {
+      .flatMap { _ -> AnyPublisher<URL, Never> in
         self.openPicker()
+        return self.pickedURLPublisher.eraseToAnyPublisher()
+      }
+      .flatMap { url in
+        return self.presentFlowDirectionSelection(
+          presentationContext: ModalPresentationContext(
+            presentingController: self.navigationController
+          )
+        )
+        .map { direction in
+          return (url, direction)
+        }
+        .eraseToAnyPublisher()
+      }
+      .sink { url, direction in
+        self.selectedVideoWith(url, flowDirection: direction)
       }
       .store(in: &disposeBag)
     
@@ -63,6 +78,11 @@ class MainModuleCoordinator: BaseCoordinator<Void>, UINavigationControllerDelega
     .eraseToAnyPublisher()
   }
   
+  func presentFlowDirectionSelection(presentationContext: PresentationContext) -> AnyPublisher<FlowDirection, Never> {
+    let coordinator = FlowSelectionCoordinator(presentationContext: presentationContext)
+    return coordinate(to: coordinator)
+  }
+  
   func imagePickerControllerDidCancel(
     _ picker: UIImagePickerController
   ) {
@@ -75,11 +95,12 @@ class MainModuleCoordinator: BaseCoordinator<Void>, UINavigationControllerDelega
   ) {
     picker.dismiss(animated: true)
     if let videoURL = info[.imageURL] as? URL {
-      selectedVideoWith(videoURL)
+      pickedURLPublisher.send(videoURL)
+//      selectedVideoWith(videoURL)
     }
   }
   
-  func selectedVideoWith(_ assetURL: URL) {
+  func selectedVideoWith(_ assetURL: URL, flowDirection: FlowDirection) {
     let sourceStream = makeFlowVideo(assetURL: assetURL).share()
 
     sourceStream
