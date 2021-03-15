@@ -16,7 +16,6 @@ class FlowDirectionSelectController: BlurBackgroundController {
   
   let contentStackView = UIStackView()
   let titleLabel = UILabel()
-  var flowPreviewViewHeightContstraint: ConstraintMakerEditable?
   let flowPreviewView = FlowPreviewView()
   let segmentControl = UISegmentedControl(items: ["Left to right", "Right to left"])
   let confirmButton = UIButton()
@@ -65,7 +64,7 @@ class FlowDirectionSelectController: BlurBackgroundController {
   
   fileprivate func setupFlowPreviewView() {
     flowPreviewView.snp.makeConstraints { (make) in
-      self.flowPreviewViewHeightContstraint = make.height.equalTo(100)
+      make.height.equalTo(100)
       make.leading.trailing.equalToSuperview().inset(16)
     }
     

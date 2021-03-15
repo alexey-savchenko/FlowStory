@@ -37,18 +37,36 @@ func makeFlowVideo(
       outputURL: url
     ) { (img, progress) -> CIImage in
       
-      let params = scaleAndPositionInAspectFillMode(img.extent.size, in: renderSize)
-      let filled = img >>> params
+      switch flowDirection {
+      case .leftToRight:
+        let params = scaleAndPositionInAspectFillMode(img.extent.size, in: renderSize)
+        let filled = img >>> params
+        
+        let maxOffset = filled.extent.width - renderSize.width
+        let offset = CGFloat(progress) * maxOffset
+        
+        let translated = filled
+          .transformed(by: .init(translationX: -params.position.x, y: 0))
+          .transformed(by: .init(translationX: -offset, y: 0))
+          .cropped(to: .init(origin: .zero, size: renderSize))
+        
+        return translated
+        
+      case .rightToLeft:
+        let params = scaleAndPositionInAspectFillMode(img.extent.size, in: renderSize)
+        let filled = img >>> params
+        
+        let maxOffset = filled.extent.width - renderSize.width
+        let offset = CGFloat(progress) * maxOffset
+        
+        let translated = filled
+          .transformed(by: .init(translationX: params.position.x, y: 0))
+          .transformed(by: .init(translationX: offset, y: 0))
+          .cropped(to: .init(origin: .zero, size: renderSize))
+        
+        return translated
+      }
       
-      let maxOffset = filled.extent.width - renderSize.width
-      let offset = CGFloat(progress) * maxOffset
-      
-      let translated = filled
-        .transformed(by: .init(translationX: -params.position.x, y: 0))
-        .transformed(by: .init(translationX: -offset, y: 0))
-        .cropped(to: .init(origin: .zero, size: renderSize))
-      
-      return translated
     } progress: { (progress) in
 
       obs.onNext(.right(value: progress))
