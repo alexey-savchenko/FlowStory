@@ -22,7 +22,8 @@ func uniqueURL() -> URL {
 }
 
 func makeFlowVideo(
-  assetURL: URL
+  assetURL: URL,
+  flowDirection: FlowDirection
 ) -> AnyPublisher<Either<AVAsset, Double>, Never> {
   let image = UIImage(contentsOfFile: assetURL.path)!.fixedOrientation()!
   let url = uniqueURL()

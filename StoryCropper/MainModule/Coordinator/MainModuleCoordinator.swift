@@ -96,13 +96,16 @@ class MainModuleCoordinator: BaseCoordinator<Void>, UINavigationControllerDelega
     picker.dismiss(animated: true)
     if let videoURL = info[.imageURL] as? URL {
       pickedURLPublisher.send(videoURL)
-//      selectedVideoWith(videoURL)
     }
   }
   
   func selectedVideoWith(_ assetURL: URL, flowDirection: FlowDirection) {
-    let sourceStream = makeFlowVideo(assetURL: assetURL).share()
-
+    let sourceStream = makeFlowVideo(
+      assetURL: assetURL,
+      flowDirection: flowDirection
+    )
+    .share()
+    
     sourceStream
       .compactMap { $0.right }
       .receive(on: DispatchQueue.main)
@@ -110,7 +113,7 @@ class MainModuleCoordinator: BaseCoordinator<Void>, UINavigationControllerDelega
       .do { value in print(value) } 
       .subscribe(mainViewController.state)
       .store(in: &disposeBag)
-
+    
     sourceStream
       .compactMap { $0.left }
       .map { asset in return (asset as! AVURLAsset).url }

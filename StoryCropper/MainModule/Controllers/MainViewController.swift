@@ -23,6 +23,32 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
   let addButton = UIButton()
   let circularProgressBarView = CircularProgressBarView()
   
+  lazy var progressBarDismissAnimation: CAAnimation = {
+    let animation0 = CABasicAnimation(keyPath: "opacity")
+    let animation1 = CABasicAnimation(keyPath: "transform")
+    
+    animation0.fromValue = 1
+    animation0.toValue = 0
+    
+    animation1.fromValue = CATransform3DIdentity
+    animation1.toValue = CATransform3DMakeScale(5, 5, 1)
+    
+    let animationgroup = CAAnimationGroup()
+    animationgroup.animations = [animation0, animation1]
+    animationgroup.duration = 0.5
+    animationgroup.delegate = self
+    return animationgroup
+  }()
+  
+  lazy var progressBarRotationAnimation: CAAnimation = {
+    let rotationAnimation = CABasicAnimation(keyPath: "transform.rotation")
+    rotationAnimation.fromValue = 0
+    rotationAnimation.toValue = Double.pi * 2
+    rotationAnimation.duration = 2
+    rotationAnimation.repeatCount = .infinity
+    return rotationAnimation
+  }()
+  
   let playerView = PlayerView(player: AVPlayer())
   let shareStackView = UIStackView()
   let instagramShareButton = UIButton()
@@ -39,57 +65,24 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
 
   private var disposeBag = Set<AnyCancellable>()
   
-  fileprivate func setupUI() {
-    [
-      playerView,
-      circularProgressBarView,
-      addButton,
-      infoLabel,
-      shareStackView,
-    ]
-    .forEach(view.addSubview)
-    
-    circularProgressBarView.snp.makeConstraints { (make) in
-      make.size.equalTo(250)
-      make.center.equalToSuperview()
-    }
-    
-    addButton.snp.makeConstraints { (make) in
-      make.center.equalTo(circularProgressBarView)
-      make.leading.trailing.equalToSuperview()
-      make.height.equalTo(250)
-    }
-    
-    shareStackView.snp.makeConstraints { (make) in
-      self.stackViewBottomConstraint = make.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(-16)
-      make.centerX.equalToSuperview()
-    }
-    
-    infoLabel.snp.makeConstraints { (make) in
-      make.center.equalTo(circularProgressBarView)
-    }
+  fileprivate func setupPlayerView() {
+    playerView.isHidden = true
+    playerView.playerLayer.videoGravity = .resizeAspectFill
+    playerView.clipsToBounds = true
+    playerView.layer.mask = maskLayer
     
     playerView.snp.makeConstraints { (make) in
       make.leading.bottom.trailing.equalToSuperview()
       make.top.equalTo(circularProgressBarView)
     }
+  }
+  
+  fileprivate func setupShareStackView() {
     
-    circularProgressBarView.progress = 0
-    addButton.setAttributedTitle(
-      .init(
-        string: "Select photo",
-        attributes: [.font: UIFont.boldSystemFont(ofSize: 32),
-                     .foregroundColor: UIColor.white]
-      ),
-      for: .normal
-    )
-    
-    infoLabel.attributedText = .init(
-      string: "Rendering...",
-      attributes: [.font: UIFont.boldSystemFont(ofSize: 32),
-                   .foregroundColor: UIColor.white]
-    )
-    infoLabel.alpha = 0
+    shareStackView.snp.makeConstraints { (make) in
+      self.stackViewBottomConstraint = make.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(-16)
+      make.centerX.equalToSuperview()
+    }
     
     [instagramShareButton, shareButton].forEach {
       $0.layer.cornerRadius = 16
@@ -114,14 +107,65 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
     
     instagramShareButton.addTarget(self, action: #selector(shareToInstagram), for: .touchUpInside)
     shareButton.addTarget(self, action: #selector(openIn), for: .touchUpInside)
+  }
+  
+  fileprivate func setupInfoLabel() {
+    infoLabel.snp.makeConstraints { (make) in
+      make.center.equalTo(circularProgressBarView)
+    }
+    infoLabel.attributedText = .init(
+      string: "Rendering...",
+      attributes: [.font: UIFont.boldSystemFont(ofSize: 32),
+                   .foregroundColor: UIColor.white]
+    )
+    infoLabel.alpha = 0
+  }
+  
+  fileprivate func setupAddButton() {
+    addButton.snp.makeConstraints { (make) in
+      make.center.equalTo(circularProgressBarView)
+      make.leading.trailing.equalToSuperview()
+      make.height.equalTo(250)
+    }
+    addButton.setAttributedTitle(
+      .init(
+        string: "Select photo",
+        attributes: [.font: UIFont.boldSystemFont(ofSize: 32),
+                     .foregroundColor: UIColor.white]
+      ),
+      for: .normal
+    )
+  }
+  
+  fileprivate func setupProgressBarView() {
+    circularProgressBarView.snp.makeConstraints { (make) in
+      make.size.equalTo(250)
+      make.center.equalToSuperview()
+    }
+    circularProgressBarView.progress = 0
+    circularProgressBarView.progressLayer.add(progressBarRotationAnimation, forKey: "rotationAnimation")
+  }
+  
+  fileprivate func setupUI() {
     
     maskLayer.colors = [UIColor.black.withAlphaComponent(0).cgColor, UIColor.black.cgColor]
-    playerView.isHidden = true
-    playerView.playerLayer.videoGravity = .resizeAspectFill
-    playerView.clipsToBounds = true
-    playerView.layer.mask = maskLayer
     view.backgroundColor = .lightGray
     navigationController?.setNavigationBarHidden(true, animated: false)
+    
+    [
+      playerView,
+      circularProgressBarView,
+      addButton,
+      infoLabel,
+      shareStackView,
+    ]
+    .forEach(view.addSubview)
+    
+    setupProgressBarView()
+    setupAddButton()
+    setupInfoLabel()
+    setupShareStackView()
+    setupPlayerView()
   }
   
   override func viewDidLoad() {
@@ -220,22 +264,8 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
   }
   
   func animateProgressBarDismiss() {
-    let animation0 = CABasicAnimation(keyPath: "opacity")
-    let animation1 = CABasicAnimation(keyPath: "transform")
-    
-    animation0.fromValue = 1
-    animation0.toValue = 0
-    
-    animation1.fromValue = CATransform3DIdentity
-    animation1.toValue = CATransform3DMakeScale(5, 5, 1)
-    
-    let animationgroup = CAAnimationGroup()
-    animationgroup.animations = [animation0, animation1]
-    animationgroup.duration = 0.5
-    animationgroup.delegate = self
-    
     circularProgressBarView.layer.opacity = 0
-    circularProgressBarView.layer.add(animationgroup, forKey: nil)
+    circularProgressBarView.layer.add(progressBarDismissAnimation, forKey: "dismissAnimation")
   }
   
   func lastPHAssetInCameraRoll() -> PHAsset? {
@@ -251,6 +281,8 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
   }
   
   func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
-    circularProgressBarView.progress = 0
+    if anim == progressBarDismissAnimation {
+      circularProgressBarView.progress = 0
+    }
   }
 }
