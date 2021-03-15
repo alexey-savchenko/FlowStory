@@ -16,10 +16,10 @@
 		2257A1B925B07F5A001F0A99 /* VideoUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2257A1B825B07F5A001F0A99 /* VideoUtility.swift */; };
 		227056C625F8E21500D37103 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227056C525F8E21500D37103 /* PlayerView.swift */; };
 		227056CA25F8E46E00D37103 /* CircularProgressBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227056C925F8E46E00D37103 /* CircularProgressBarView.swift */; };
-		227056CD25F8F8CC00D37103 /* AnyPublisher+Create.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227056CC25F8F8CC00D37103 /* AnyPublisher+Create.swift */; };
 		227056D125FCC42400D37103 /* BlurBackgroundController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227056D025FCC42400D37103 /* BlurBackgroundController.swift */; };
 		227056D525FCC52500D37103 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 227056D425FCC52500D37103 /* SnapKit */; };
 		227056D825FCC7DF00D37103 /* FlowDirectionSelectController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227056D725FCC7DF00D37103 /* FlowDirectionSelectController.swift */; };
+		227056E725FF8CCA00D37103 /* MainModuleCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227056E625FF8CCA00D37103 /* MainModuleCoordinator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,9 +33,9 @@
 		2257A1B825B07F5A001F0A99 /* VideoUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoUtility.swift; sourceTree = "<group>"; };
 		227056C525F8E21500D37103 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 		227056C925F8E46E00D37103 /* CircularProgressBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularProgressBarView.swift; sourceTree = "<group>"; };
-		227056CC25F8F8CC00D37103 /* AnyPublisher+Create.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AnyPublisher+Create.swift"; sourceTree = "<group>"; };
 		227056D025FCC42400D37103 /* BlurBackgroundController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurBackgroundController.swift; sourceTree = "<group>"; };
 		227056D725FCC7DF00D37103 /* FlowDirectionSelectController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowDirectionSelectController.swift; sourceTree = "<group>"; };
+		227056E625FF8CCA00D37103 /* MainModuleCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainModuleCoordinator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,19 +71,67 @@
 			isa = PBXGroup;
 			children = (
 				2257A1A225B07DDA001F0A99 /* AppDelegate.swift */,
-				2257A1B825B07F5A001F0A99 /* VideoUtility.swift */,
-				227056C925F8E46E00D37103 /* CircularProgressBarView.swift */,
-				2257A1A625B07DDA001F0A99 /* MainViewController.swift */,
+				227056DE25FF8C5300D37103 /* DirectionSelectionModule */,
+				227056E325FF8C7D00D37103 /* Shared */,
+				227056DD25FF8C4900D37103 /* MainModule */,
 				2257A1AB25B07DDC001F0A99 /* Assets.xcassets */,
 				2257A1AD25B07DDC001F0A99 /* LaunchScreen.storyboard */,
 				2257A1B025B07DDC001F0A99 /* Info.plist */,
-				2254711E25EA964300B4ECA3 /* Ext.swift */,
-				227056C525F8E21500D37103 /* PlayerView.swift */,
-				227056CC25F8F8CC00D37103 /* AnyPublisher+Create.swift */,
-				227056D025FCC42400D37103 /* BlurBackgroundController.swift */,
-				227056D725FCC7DF00D37103 /* FlowDirectionSelectController.swift */,
 			);
 			path = StoryCropper;
+			sourceTree = "<group>";
+		};
+		227056DD25FF8C4900D37103 /* MainModule */ = {
+			isa = PBXGroup;
+			children = (
+				227056E525FF8CA000D37103 /* Coordinator */,
+				227056E225FF8C6E00D37103 /* UI */,
+				227056E025FF8C6700D37103 /* Controllers */,
+			);
+			path = MainModule;
+			sourceTree = "<group>";
+		};
+		227056DE25FF8C5300D37103 /* DirectionSelectionModule */ = {
+			isa = PBXGroup;
+			children = (
+				227056D725FCC7DF00D37103 /* FlowDirectionSelectController.swift */,
+			);
+			path = DirectionSelectionModule;
+			sourceTree = "<group>";
+		};
+		227056E025FF8C6700D37103 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				2257A1A625B07DDA001F0A99 /* MainViewController.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		227056E225FF8C6E00D37103 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				227056C925F8E46E00D37103 /* CircularProgressBarView.swift */,
+				227056C525F8E21500D37103 /* PlayerView.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		227056E325FF8C7D00D37103 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				2257A1B825B07F5A001F0A99 /* VideoUtility.swift */,
+				2254711E25EA964300B4ECA3 /* Ext.swift */,
+				227056D025FCC42400D37103 /* BlurBackgroundController.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		227056E525FF8CA000D37103 /* Coordinator */ = {
+			isa = PBXGroup;
+			children = (
+				227056E625FF8CCA00D37103 /* MainModuleCoordinator.swift */,
+			);
+			path = Coordinator;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -170,7 +218,7 @@
 				2257A1A725B07DDA001F0A99 /* MainViewController.swift in Sources */,
 				227056CA25F8E46E00D37103 /* CircularProgressBarView.swift in Sources */,
 				2257A1A325B07DDA001F0A99 /* AppDelegate.swift in Sources */,
-				227056CD25F8F8CC00D37103 /* AnyPublisher+Create.swift in Sources */,
+				227056E725FF8CCA00D37103 /* MainModuleCoordinator.swift in Sources */,
 				227056D825FCC7DF00D37103 /* FlowDirectionSelectController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

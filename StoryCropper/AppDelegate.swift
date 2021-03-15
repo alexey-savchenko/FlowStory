@@ -6,11 +6,16 @@
 //
 
 import UIKit
+import UNILib
+import Combine
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
   
   var window: UIWindow?
+  
+  var mainCoordinator: MainModuleCoordinator!
+  private var disposeBag = Set<AnyCancellable>()
   
   func application(
     _ application: UIApplication,
@@ -18,10 +23,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   ) -> Bool {
     
     window = UIWindow(frame: UIScreen.main.bounds)
-    let nav = UINavigationController(rootViewController: MainViewController())
-    window?.rootViewController = nav
-    window?.makeKeyAndVisible()
-    
+    mainCoordinator = .init(window: window!)
+    mainCoordinator
+      .start()
+      .sink(receiveValue: identity)
+      .store(in: &disposeBag)
+//    let nav = UINavigationController(rootViewController: MainViewController())
+//    window?.rootViewController = nav
+//    window?.makeKeyAndVisible()
+//
     return true
   }
 }

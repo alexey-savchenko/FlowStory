@@ -24,7 +24,7 @@ func uniqueURL() -> URL {
 func makeFlowVideo(
   assetURL: URL
 ) -> AnyPublisher<Either<AVAsset, Double>, Never> {
-  let image = UIImage(contentsOfFile: assetURL.path)!
+  let image = UIImage(contentsOfFile: assetURL.path)!.fixedOrientation()!
   let url = uniqueURL()
   let renderSize = CGSize(width: 1080, height: 1920)
   return AnyPublisher.create { (obs) -> Disposable in
@@ -289,16 +289,18 @@ private func appendPixelBufferForImage(
         pixelBufferPointer
       )
       
-      //        let _buffer = buffer(from: image)!
-      
       /// check if the memory of the pixel buffer pointer can be accessed and the creation status is 0
-      if let pixelBuffer = pixelBufferPointer.pointee, status == 0 {
+      if let _ = pixelBufferPointer.pointee,
+         status == 0 {
         // if the condition is satisfied append the image pixels to the pixel buffer pool
         //        fillPixelBufferFromImage(image, pixelBuffer: pixelBuffer)
         
         // generate new append status
         appendSucceeded = pixelBufferAdaptor
-          .append(buffer(from: image)!, withPresentationTime: presentationTime)
+          .append(
+            buffer(from: image)!,
+            withPresentationTime: presentationTime
+          )
         
         /**
          *  Destroy the pixel buffer contains
