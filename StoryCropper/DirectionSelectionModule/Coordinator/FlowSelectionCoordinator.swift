@@ -12,13 +12,15 @@ import Combine
 class FlowSelectionCoordinator: BaseCoordinator<FlowDirection> {
   
   let presentationContext: PresentationContext
+  let imageURL: URL
   
-  internal init(presentationContext: PresentationContext) {
+  init(imageURL: URL, presentationContext: PresentationContext) {
+    self.imageURL = imageURL
     self.presentationContext = presentationContext
   }
   
   override func start() -> AnyPublisher<FlowDirection, Never> {
-    let flowDirectionSelectController = FlowDirectionSelectController()
+    let flowDirectionSelectController = FlowDirectionSelectController(imageURL: imageURL)
     flowDirectionSelectController.modalPresentationStyle = .fullScreen
     presentationContext.present(flowDirectionSelectController, animated: true)
     

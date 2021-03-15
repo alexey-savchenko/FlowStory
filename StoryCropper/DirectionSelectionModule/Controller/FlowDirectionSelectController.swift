@@ -8,6 +8,7 @@
 import UIKit
 import UNILib
 import Combine
+import SnapKit
 
 class FlowDirectionSelectController: BlurBackgroundController {
   
@@ -15,11 +16,27 @@ class FlowDirectionSelectController: BlurBackgroundController {
   
   let contentStackView = UIStackView()
   let titleLabel = UILabel()
+  var flowPreviewViewHeightContstraint: ConstraintMakerEditable?
   let flowPreviewView = FlowPreviewView()
   let segmentControl = UISegmentedControl(items: ["Left to right", "Right to left"])
   let confirmButton = UIButton()
   
   public var disposeBag = Set<AnyCancellable>()
+  
+  let imageURL: URL
+  
+  lazy var image: UIImage = {
+    return UIImage(contentsOfFile: imageURL.path)!.fixedOrientation()!
+  }()
+  
+  init(imageURL: URL) {
+    self.imageURL = imageURL
+    super.init()
+  }
+  
+  required public init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
   
   fileprivate func setupContainerView() {
     contentView.addSubview(containerView)
@@ -48,9 +65,11 @@ class FlowDirectionSelectController: BlurBackgroundController {
   
   fileprivate func setupFlowPreviewView() {
     flowPreviewView.snp.makeConstraints { (make) in
-      make.height.equalTo(100)
+      self.flowPreviewViewHeightContstraint = make.height.equalTo(100)
       make.leading.trailing.equalToSuperview().inset(16)
     }
+    
+    flowPreviewView.backgroundImageView.image = image
   }
   
   fileprivate func setupTitleLabel() {
@@ -127,5 +146,14 @@ class FlowDirectionSelectController: BlurBackgroundController {
     super.viewDidAppear(animated)
     
     self.flowPreviewView.set(direction: .leftToRight)
+  }
+  
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    
+    let imageHeightRatio = image.size.height / image.size.width
+    flowPreviewView.snp.updateConstraints { (make) in
+      make.height.equalTo(flowPreviewView.frame.width * imageHeightRatio)
+    }
   }
 }

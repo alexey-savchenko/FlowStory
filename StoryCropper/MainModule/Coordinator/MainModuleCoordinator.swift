@@ -41,7 +41,8 @@ class MainModuleCoordinator: BaseCoordinator<Void>, UINavigationControllerDelega
         return self.presentFlowDirectionSelection(
           presentationContext: ModalPresentationContext(
             presentingController: self.navigationController
-          )
+          ),
+          imageURL: url
         )
         .map { direction in
           return (url, direction)
@@ -78,8 +79,14 @@ class MainModuleCoordinator: BaseCoordinator<Void>, UINavigationControllerDelega
     .eraseToAnyPublisher()
   }
   
-  func presentFlowDirectionSelection(presentationContext: PresentationContext) -> AnyPublisher<FlowDirection, Never> {
-    let coordinator = FlowSelectionCoordinator(presentationContext: presentationContext)
+  func presentFlowDirectionSelection(
+    presentationContext: PresentationContext,
+    imageURL: URL
+  ) -> AnyPublisher<FlowDirection, Never> {
+    let coordinator = FlowSelectionCoordinator(
+      imageURL: imageURL,
+      presentationContext: presentationContext
+    )
     return coordinate(to: coordinator)
   }
   

@@ -11,6 +11,7 @@ import UNILib
 class FlowPreviewView: UIView {
   
   let frameLayer = CALayer()
+  let backgroundImageView = UIImageView()
   
   override init(frame: CGRect) {
     super.init(frame: frame)
@@ -31,8 +32,10 @@ class FlowPreviewView: UIView {
   }
   
   private func setupUI() {
-    backgroundColor = .orange
-    
+    addSubview(backgroundImageView)
+    backgroundImageView.snp.makeConstraints { (make) in
+      make.edges.equalToSuperview()
+    }
     layer.addSublayer(frameLayer)
     clipsToBounds = true
     frameLayer.backgroundColor = UIColor.cyan.withAlphaComponent(0.2).cgColor

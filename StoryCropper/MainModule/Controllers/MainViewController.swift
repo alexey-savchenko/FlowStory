@@ -222,7 +222,7 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
       addButton.alpha = 1
       addButton.setAttributedTitle(
         .init(
-          string: "Select photo",
+          string: "Tap to select photo",
           attributes: [.font: UIFont.boldSystemFont(ofSize: 32),
                        .foregroundColor: UIColor.white]
         ),
