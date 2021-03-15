@@ -21,7 +21,7 @@ class FlowSelectionCoordinator: BaseCoordinator<FlowDirection> {
   
   override func start() -> AnyPublisher<FlowDirection, Never> {
     let flowDirectionSelectController = FlowDirectionSelectController(imageURL: imageURL)
-    flowDirectionSelectController.modalPresentationStyle = .fullScreen
+    flowDirectionSelectController.modalPresentationStyle = .overFullScreen
     presentationContext.present(flowDirectionSelectController, animated: true)
     
     return flowDirectionSelectController.confirmButton

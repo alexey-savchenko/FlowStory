@@ -10,7 +10,7 @@ import UNILib
 import Combine
 import SnapKit
 
-class FlowDirectionSelectController: BlurBackgroundController {
+class FlowDirectionSelectController: DarkenBackgroundController {
   
   let containerView = UIView()
   
@@ -30,7 +30,7 @@ class FlowDirectionSelectController: BlurBackgroundController {
   
   init(imageURL: URL) {
     self.imageURL = imageURL
-    super.init()
+    super.init(nibName: nil, bundle: nil)
   }
   
   required public init?(coder: NSCoder) {
@@ -38,7 +38,10 @@ class FlowDirectionSelectController: BlurBackgroundController {
   }
   
   fileprivate func setupContainerView() {
-    contentView.addSubview(containerView)
+    containerView.layer.cornerRadius = 16
+    containerView.clipsToBounds = true
+    containerView.backgroundColor = .lightGray
+    view.addSubview(containerView)
     containerView.snp.makeConstraints { (make) in
       make.center.equalToSuperview()
       make.leading.trailing.equalToSuperview().inset(32)
@@ -116,9 +119,7 @@ class FlowDirectionSelectController: BlurBackgroundController {
   
   override func setupUI() {
     super.setupUI()
-    
-    containerView.backgroundColor = .lightGray
-    
+        
     setupContainerView()
     setupContentStackView()
     setupFlowPreviewView()
