@@ -17,7 +17,7 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
   enum State: Hashable {
     case initial
     case rendering(progress: Double)
-    case rendered(url: URL)
+    case rendered(url: URL, localIdentifier: String?)
   }
   
   let addButton = UIButton()
@@ -50,11 +50,12 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
   }()
   
   let playerView = PlayerView(player: AVPlayer())
+  let shareLabel = UILabel()
   let shareStackView = UIStackView()
   let instagramShareButton = UIButton()
   let shareButton = UIButton()
   let infoLabel = UILabel()
-  let maskLayer = CAGradientLayer()
+  let maskLayer = CALayer()
   
   var lastExportedURL: URL?
   var playerObservationToken: Any?
@@ -69,11 +70,10 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
     playerView.isHidden = true
     playerView.playerLayer.videoGravity = .resizeAspectFill
     playerView.clipsToBounds = true
-    playerView.layer.mask = maskLayer
+    playerView.layer.addSublayer(maskLayer)
     
     playerView.snp.makeConstraints { (make) in
-      make.leading.bottom.trailing.equalToSuperview()
-      make.top.equalTo(circularProgressBarView)
+      make.leading.bottom.top.trailing.equalToSuperview()
     }
   }
   
@@ -95,7 +95,7 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
     }
     
     instagramShareButton.setTitle("Instagram", for: .normal)
-    shareButton.setTitle("Export", for: .normal)
+    shareButton.setTitle("Other", for: .normal)
     
     instagramShareButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
     shareButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
@@ -104,9 +104,6 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
     shareStackView.spacing = 24
     shareStackView.alignment = .center
     shareStackView.alpha = 0
-    
-    instagramShareButton.addTarget(self, action: #selector(shareToInstagram), for: .touchUpInside)
-    shareButton.addTarget(self, action: #selector(openIn), for: .touchUpInside)
   }
   
   fileprivate func setupInfoLabel() {
@@ -148,7 +145,7 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
   
   fileprivate func setupUI() {
     
-    maskLayer.colors = [UIColor.black.withAlphaComponent(0).cgColor, UIColor.black.cgColor]
+    maskLayer.backgroundColor = UIColor.black.withAlphaComponent(0.3).cgColor
     view.backgroundColor = .lightGray
     navigationController?.setNavigationBarHidden(true, animated: false)
     
@@ -158,6 +155,7 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
       addButton,
       infoLabel,
       shareStackView,
+      shareLabel
     ]
     .forEach(view.addSubview)
     
@@ -166,18 +164,19 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
     setupInfoLabel()
     setupShareStackView()
     setupPlayerView()
+    
+    shareLabel.attributedText = .init(
+      string: "Share:",
+      attributes: [.foregroundColor: UIColor.white,
+                   .font: UIFont.systemFont(ofSize: 28, weight: .medium)]
+    )
+    shareLabel.snp.makeConstraints { (make) in
+      make.bottom.equalTo(shareStackView.snp.top).offset(-16)
+      make.centerX.equalToSuperview()
+    }
   }
   
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    
-    setupUI()
-    
-    try! FileManager.default.contentsOfDirectory(atPath: FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].path)
-      .forEach {
-        try? FileManager.default.removeItem(atPath: $0)
-      }
-    
+  fileprivate func setupBindings() {
     playerObservationToken = playerView.player.addPeriodicTimeObserver(forInterval: CMTimeMake(value: 1, timescale: 60), queue: nil) { [unowned playerView] (time) in
       if time == playerView.player.currentItem?.duration {
         playerView.player.seek(to: .zero)
@@ -188,6 +187,43 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
     state
       .sink(receiveValue: { [weak self] state in self?.render(state: state) })
       .store(in: &disposeBag)
+    
+    instagramShareButton
+      .publisher(for: .touchUpInside)
+      .sink { [unowned self] _ in
+        if case State.rendered(_, let _localIdentifier) = state.value,
+           let localIdentifier = _localIdentifier {
+          let url = URL(string: "instagram://library?OpenInEditor=1&LocalIdentifier=\(localIdentifier)")!
+          if UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url)
+          }
+        }
+      }
+      .store(in: &disposeBag)
+    
+    shareButton
+      .publisher(for: .touchUpInside)
+      .sink { [unowned self] _ in
+        let activityController = UIActivityViewController(
+          activityItems: [self.lastExportedURL!],
+          applicationActivities: nil
+        )
+        self.present(activityController, animated: true)
+      }
+      .store(in: &disposeBag)
+  }
+  
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    
+    setupUI()
+    
+    try? FileManager.default.contentsOfDirectory(
+      atPath: FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].path
+    )
+    .forEach(FileManager.default.removeItem)
+    
+    setupBindings()
   }
   
   override func viewDidLayoutSubviews() {
@@ -195,22 +231,10 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
     
     maskLayer.frame = playerView.bounds
   }
-  
-  @objc func shareToInstagram() {
-    if let asset = lastPHAssetInCameraRoll() {
-      let url = URL(string: "instagram://library?OpenInEditor=1&LocalIdentifier=\(asset.localIdentifier)")!
-      if UIApplication.shared.canOpenURL(url) {
-        UIApplication.shared.open(url)
-      }
-    }
-  }
-  
-  @objc func openIn() {
-    let c = UIActivityViewController(activityItems: [lastExportedURL!], applicationActivities: nil)
-    self.present(c, animated: true)
-  }
 
   func render(state: State) {
+    
+    shareLabel.isHidden = true
     playerView.isHidden = true
     infoLabel.alpha = 0
     addButton.alpha = 0
@@ -228,7 +252,8 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
         ),
         for: .normal
       )
-    case .rendered(let url):
+    case .rendered(let url, _):
+      shareLabel.isHidden = false
       lastExportedURL = url
       infoLabel.alpha = 0
       animateProgressBarDismiss()
@@ -266,18 +291,6 @@ class MainViewController: UIViewController, UINavigationControllerDelegate, UIIm
   func animateProgressBarDismiss() {
     circularProgressBarView.layer.opacity = 0
     circularProgressBarView.layer.add(progressBarDismissAnimation, forKey: "dismissAnimation")
-  }
-  
-  func lastPHAssetInCameraRoll() -> PHAsset? {
-    let ops = PHFetchOptions()
-    ops.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-    let fetchResult = PHAsset.fetchAssets(with: .video, options: ops)
-    var phAssets = [PHAsset]()
-    fetchResult.enumerateObjects { asset, idx, _ in
-      phAssets.append(asset)
-    }
-    let lastAsset = phAssets.first
-    return lastAsset
   }
   
   func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {

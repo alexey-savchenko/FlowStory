@@ -33,6 +33,7 @@ class MainModuleCoordinator: BaseCoordinator<Void>, UINavigationControllerDelega
       .publisher(for: .touchUpInside)
       .map(toVoid)
       .flatMap(requestAuthorization)
+      .receive(on: DispatchQueue.main)
       .flatMap { _ -> AnyPublisher<URL, Never> in
         self.openPicker()
         return self.pickedURLPublisher.eraseToAnyPublisher()
@@ -125,22 +126,28 @@ class MainModuleCoordinator: BaseCoordinator<Void>, UINavigationControllerDelega
       .compactMap { $0.left }
       .map { asset in return (asset as! AVURLAsset).url }
       .receive(on: DispatchQueue.main)
-      .do { url in
-        let _ = self.saveVideoToAlbum(url)
+      .map { url -> (URL, String?) in
+        let identifier = self.saveVideoToAlbum(url)
+        return (url, identifier)
       }
-      .map(MainViewController.State.rendered(url:))
+      .map(MainViewController.State.rendered(url:localIdentifier:))
       .subscribe(mainViewController.state)
       .store(in: &disposeBag)
   }
   
-  func saveVideoToAlbum(_ outputURL: URL) -> Error? {
+  func saveVideoToAlbum(_ outputURL: URL) -> String? {
+    var localIdentifier: String?
+    
     do {
       try PHPhotoLibrary.shared().performChangesAndWait {
-        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputURL)
+        let saveRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputURL)!
+        let placeholder = saveRequest.placeholderForCreatedAsset
+        localIdentifier = placeholder?.localIdentifier
       }
-      return nil
     } catch {
-      return error
+      print(error)
     }
+    
+    return localIdentifier
   }
 }
