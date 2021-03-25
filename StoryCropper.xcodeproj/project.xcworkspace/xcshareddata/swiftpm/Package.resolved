@@ -2,6 +2,24 @@
   "object": {
     "pins": [
       {
+        "package": "Reachability",
+        "repositoryURL": "https://github.com/ashleymills/Reachability.swift",
+        "state": {
+          "branch": null,
+          "revision": "c01bbdf2d633cf049ae1ed1a68a2020a8bda32e2",
+          "version": "5.1.0"
+        }
+      },
+      {
+        "package": "RxSwift",
+        "repositoryURL": "https://github.com/ReactiveX/RxSwift.git",
+        "state": {
+          "branch": null,
+          "revision": "c6c0c540109678b96639c25e9c0ebe4a6d7a69a9",
+          "version": "5.0.0"
+        }
+      },
+      {
         "package": "SnapKit",
         "repositoryURL": "https://github.com/SnapKit/SnapKit.git",
         "state": {
@@ -12,10 +30,10 @@
       },
       {
         "package": "UNILib",
-        "repositoryURL": "https://github.com/alexey-savchenko/UNILib.git",
+        "repositoryURL": "https://github.com/alexey-savchenko/UNILib",
         "state": {
           "branch": "main",
-          "revision": "c0d2ebc451a18efd4ef25275c0e51c32257cf8dd",
+          "revision": "a2ed4c4b07e7846484cb69b683877a7e28e36a0a",
           "version": null
         }
       }

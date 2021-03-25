@@ -9,7 +9,8 @@ import UIKit
 import Photos
 import MobileCoreServices
 import Combine
-import UNILib
+import UNILibCore
+import CombineUNILib
 import SnapKit
 
 class MainViewController: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate, CAAnimationDelegate {

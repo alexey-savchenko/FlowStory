@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2254711B25EA803F00B4ECA3 /* UNILib in Frameworks */ = {isa = PBXBuildFile; productRef = 2254711A25EA803F00B4ECA3 /* UNILib */; };
+		222409D4260CCF1700849172 /* UNILibCore in Frameworks */ = {isa = PBXBuildFile; productRef = 222409D3260CCF1700849172 /* UNILibCore */; };
+		222409D6260CCF1700849172 /* CombineUNILib in Frameworks */ = {isa = PBXBuildFile; productRef = 222409D5260CCF1700849172 /* CombineUNILib */; };
 		2254711F25EA964300B4ECA3 /* Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2254711E25EA964300B4ECA3 /* Ext.swift */; };
 		2257A1A325B07DDA001F0A99 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2257A1A225B07DDA001F0A99 /* AppDelegate.swift */; };
 		2257A1A725B07DDA001F0A99 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2257A1A625B07DDA001F0A99 /* MainViewController.swift */; };
@@ -49,7 +50,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2254711B25EA803F00B4ECA3 /* UNILib in Frameworks */,
+				222409D6260CCF1700849172 /* CombineUNILib in Frameworks */,
+				222409D4260CCF1700849172 /* UNILibCore in Frameworks */,
 				227056D525FCC52500D37103 /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -192,8 +194,9 @@
 			);
 			name = StoryCropper;
 			packageProductDependencies = (
-				2254711A25EA803F00B4ECA3 /* UNILib */,
 				227056D425FCC52500D37103 /* SnapKit */,
+				222409D3260CCF1700849172 /* UNILibCore */,
+				222409D5260CCF1700849172 /* CombineUNILib */,
 			);
 			productName = StoryCropper;
 			productReference = 2257A19F25B07DDA001F0A99 /* StoryCropper.app */;
@@ -223,8 +226,8 @@
 			);
 			mainGroup = 2257A19625B07DDA001F0A99;
 			packageReferences = (
-				2254711925EA803F00B4ECA3 /* XCRemoteSwiftPackageReference "UNILib" */,
 				227056D325FCC52500D37103 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				222409D2260CCF1700849172 /* XCRemoteSwiftPackageReference "UNILib" */,
 			);
 			productRefGroup = 2257A1A025B07DDA001F0A99 /* Products */;
 			projectDirPath = "";
@@ -461,9 +464,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		2254711925EA803F00B4ECA3 /* XCRemoteSwiftPackageReference "UNILib" */ = {
+		222409D2260CCF1700849172 /* XCRemoteSwiftPackageReference "UNILib" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/alexey-savchenko/UNILib.git";
+			repositoryURL = "https://github.com/alexey-savchenko/UNILib";
 			requirement = {
 				branch = main;
 				kind = branch;
@@ -480,10 +483,15 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		2254711A25EA803F00B4ECA3 /* UNILib */ = {
+		222409D3260CCF1700849172 /* UNILibCore */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 2254711925EA803F00B4ECA3 /* XCRemoteSwiftPackageReference "UNILib" */;
-			productName = UNILib;
+			package = 222409D2260CCF1700849172 /* XCRemoteSwiftPackageReference "UNILib" */;
+			productName = UNILibCore;
+		};
+		222409D5260CCF1700849172 /* CombineUNILib */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 222409D2260CCF1700849172 /* XCRemoteSwiftPackageReference "UNILib" */;
+			productName = CombineUNILib;
 		};
 		227056D425FCC52500D37103 /* SnapKit */ = {
 			isa = XCSwiftPackageProductDependency;

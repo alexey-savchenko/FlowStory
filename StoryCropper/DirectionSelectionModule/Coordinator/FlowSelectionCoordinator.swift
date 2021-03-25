@@ -5,7 +5,8 @@
 //  Created by Alexey Savchenko on 15.03.2021.
 //
 
-import UNILib
+import UNILibCore
+import CombineUNILib
 import UIKit
 import Combine
 
